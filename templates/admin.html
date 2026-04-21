@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — Drivera{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:120px;">
+    <div class="container">
+        <div style="margin-bottom:40px;">
+            <h2>Admin <span class="text-gradient">Panel</span></h2>
+            <p class="text-muted" style="margin-top:4px;">Platform-wide metrics, supplier management, and booking oversight.</p>
+        </div>
+
+        <!-- Platform Stats -->
+        <div class="grid grid-4" style="margin-bottom:48px;">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_customers }}</div>
+                <div class="stat-label">Customers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_suppliers }}</div>
+                <div class="stat-label">Suppliers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_bookings }}</div>
+                <div class="stat-label">Bookings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">₹{{ total_revenue|int }}</div>
+                <div class="stat-label">Revenue</div>
+            </div>
+        </div>
+
+        <!-- Suppliers Management -->
+        <h3 style="margin-bottom:20px;">Supplier Management</h3>
+        <div class="table-wrapper" style="margin-bottom:48px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Company</th>
+                        <th>Email</th>
+                        <th>Location</th>
+                        <th>Rating</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in suppliers %}
+                    <tr>
+                        <td>#{{ s[0] }}</td>
+                        <td style="font-weight:600;">{{ s[1] }}</td>
+                        <td>{{ s[2] }}</td>
+                        <td>{{ s[3] }}</td>
+                        <td><span class="star-rating">⭐ {{ s[5] }}</span></td>
+                        <td>
+                            {% if s[4] == 1 %}
+                                <span class="badge badge-verified">✓ Verified</span>
+                            {% else %}
+                                <span class="badge badge-pending">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recent Bookings -->
+        <h3 style="margin-bottom:20px;">Recent Bookings</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Supplier</th>
+                        <th>Vehicle</th>
+                        <th>Fleet</th>
+                        <th>Dates</th>
+                        <th>Cost</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td>#{{ b[0] }}</td>
+                        <td>{{ b[1] }}</td>
+                        <td>{{ b[2] }}</td>
+                        <td>{{ b[3] }}</td>
+                        <td>{{ b[4] }}</td>
+                        <td>{{ b[5] }} → {{ b[6] }}</td>
+                        <td style="font-weight:600;color:var(--primary);">₹{{ b[7]|int }}</td>
+                        <td>
+                            <span class="badge badge-{{ b[8] }}">{{ b[8]|capitalize }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

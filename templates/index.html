@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Drivera — Fleet Rentals, Simplified for Business{% endblock %}
+
+{% block content %}
+<!-- ══════════════════════════════════════════
+     HERO SECTION
+     ══════════════════════════════════════════ -->
+<section class="hero" id="hero">
+    <div class="container">
+        <div class="hero-content">
+            <span class="hero-subtitle">🚀 B2B Fleet Rental Platform</span>
+            <h1>Fleet Rentals, <span class="text-gradient">Simplified</span> for Business</h1>
+            <p class="hero-desc">
+                Search, compare, and book bulk vehicle fleets from verified suppliers across India.
+                One platform for all your corporate fleet needs.
+            </p>
+            <div class="hero-actions">
+                <a href="{{ url_for('booking') }}" class="btn btn-primary btn-lg" id="heroBookFleet">Book a Fleet</a>
+                <a href="{{ url_for('suppliers') }}" class="btn btn-outline btn-lg" id="heroForSuppliers">For Suppliers</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat animate-on-scroll">
+                    <h3>500+</h3>
+                    <p>Vehicles Available</p>
+                </div>
+                <div class="hero-stat animate-on-scroll">
+                    <h3>50+</h3>
+                    <p>Verified Suppliers</p>
+                </div>
+                <div class="hero-stat animate-on-scroll">
+                    <h3>98%</h3>
+                    <p>On-time Delivery</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     HOW IT WORKS
+     ══════════════════════════════════════════ -->
+<section class="section how-it-works" id="howItWorks">
+    <div class="container">
+        <div class="section-header">
+            <h2>How It <span class="text-gradient">Works</span></h2>
+            <p>Three simple steps to get your fleet booked and on the road.</p>
+        </div>
+        <div class="grid grid-3">
+            <div class="card step-card animate-on-scroll">
+                <span class="step-number">01</span>
+                <div class="card-icon">🔍</div>
+                <h3>Search & Select</h3>
+                <p>Browse suppliers by location, vehicle type, fleet size, and date range. Compare ratings and pricing at a glance.</p>
+            </div>
+            <div class="card step-card animate-on-scroll animate-delay-1">
+                <span class="step-number">02</span>
+                <div class="card-icon">📋</div>
+                <h3>Book in Bulk</h3>
+                <p>Select your fleet size, pick your dates, and confirm your booking — all in one streamlined flow.</p>
+            </div>
+            <div class="card step-card animate-on-scroll animate-delay-2">
+                <span class="step-number">03</span>
+                <div class="card-icon">📊</div>
+                <h3>Manage & Track</h3>
+                <p>Track your fleet bookings, manage invoices, and monitor delivery status from your personalized dashboard.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     WHY DRIVERA
+     ══════════════════════════════════════════ -->
+<section class="section why-drivera" id="whyDrivera">
+    <div class="container">
+        <div class="section-header">
+            <h2>Why <span class="text-gradient">Drivera</span>?</h2>
+            <p>Built specifically for businesses that need reliable fleet solutions at scale.</p>
+        </div>
+        <div class="grid grid-4">
+            <div class="card animate-on-scroll">
+                <div class="card-icon">🚛</div>
+                <h3>Bulk Booking</h3>
+                <p>Book 10, 50, or 100+ vehicles in a single transaction. Built for enterprise-scale demands.</p>
+            </div>
+            <div class="card animate-on-scroll animate-delay-1">
+                <div class="card-icon">💰</div>
+                <h3>Centralized Billing</h3>
+                <p>One invoice for all your fleet bookings. Simplified accounting and expense tracking.</p>
+            </div>
+            <div class="card animate-on-scroll animate-delay-2">
+                <div class="card-icon">📍</div>
+                <h3>Real-time Tracking</h3>
+                <p>Monitor fleet status, delivery timelines, and booking progress in real-time.</p>
+            </div>
+            <div class="card animate-on-scroll animate-delay-3">
+                <div class="card-icon">✅</div>
+                <h3>Verified Suppliers</h3>
+                <p>Every supplier goes through our verification process. Look for the green badge.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CTA SECTION
+     ══════════════════════════════════════════ -->
+<section class="section" id="ctaSection" style="text-align:center;">
+    <div class="container">
+        <h2 style="margin-bottom:16px;">Ready to Simplify Your <span class="text-gradient">Fleet Rentals</span>?</h2>
+        <p class="text-muted" style="max-width:500px;margin:0 auto 32px;font-size:1.05rem;">
+            Join hundreds of businesses already using Drivera for their fleet needs.
+        </p>
+        <div class="flex-center gap-md" style="flex-wrap:wrap;">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started Free</a>
+            <a href="{{ url_for('suppliers') }}" class="btn btn-outline btn-lg">Become a Supplier</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

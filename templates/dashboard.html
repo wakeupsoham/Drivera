@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Drivera{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:120px;">
+    <div class="container">
+        <div class="flex-between" style="margin-bottom:40px;flex-wrap:wrap;gap:16px;">
+            <div>
+                <h2>Welcome back, <span class="text-gradient">{{ current_user.name }}</span></h2>
+                <p class="text-muted" style="margin-top:4px;">Manage your fleet bookings and track delivery status.</p>
+            </div>
+            <a href="{{ url_for('booking') }}" class="btn btn-primary">+ New Booking</a>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="grid grid-4" style="margin-bottom:40px;">
+            <div class="stat-card">
+                <div class="stat-value">{{ bookings|length }}</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {{ bookings|selectattr(9, 'equalto', 'confirmed')|list|length }}
+                </div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {{ bookings|selectattr(9, 'equalto', 'pending')|list|length }}
+                </div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    ₹{{ bookings|sum(attribute=8)|int if bookings else 0 }}
+                </div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <h3 style="margin-bottom:20px;">Booking History</h3>
+
+        {% if bookings|length > 0 %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Supplier</th>
+                        <th>Vehicle</th>
+                        <th>Fleet Size</th>
+                        <th>Dates</th>
+                        <th>Total Cost</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td>#{{ b[0] }}</td>
+                        <td>{{ b[1] }}</td>
+                        <td>{{ b[2] }} {{ b[3] }} <span class="text-muted">({{ b[4] }})</span></td>
+                        <td>{{ b[5] }} vehicles</td>
+                        <td>{{ b[6] }} → {{ b[7] }}</td>
+                        <td style="font-weight:600;color:var(--primary);">₹{{ b[8]|int }}</td>
+                        <td>
+                            <span class="badge badge-{{ b[9] }}">{{ b[9]|capitalize }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card" style="text-align:center;padding:60px;">
+            <p style="font-size:2rem;margin-bottom:8px;">📋</p>
+            <h3>No bookings yet</h3>
+            <p class="text-muted" style="margin-top:8px;margin-bottom:24px;">Start by searching for fleet suppliers and making your first booking.</p>
+            <a href="{{ url_for('booking') }}" class="btn btn-primary">Book a Fleet</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Drivera — B2B Fleet Rental Platform. Search, compare, and book fleets in bulk from verified suppliers.">
+    <title>{% block title %}Drivera — Fleet Rentals, Simplified for Business{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- ── Navbar ──────────────────────────────── -->
+    <nav class="navbar" id="navbar">
+        <div class="container flex-between">
+            <a href="{{ url_for('index') }}" class="nav-brand">Drive<span>ra</span></a>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">Home</a></li>
+                <li><a href="{{ url_for('booking') }}" class="{{ 'active' if request.endpoint == 'booking' }}">Book a Fleet</a></li>
+                <li><a href="{{ url_for('suppliers') }}" class="{{ 'active' if request.endpoint == 'suppliers' }}">Suppliers</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Dashboard</a></li>
+                    {% if current_user.role == 'admin' %}
+                        <li><a href="{{ url_for('admin') }}" class="{{ 'active' if request.endpoint == 'admin' }}">Admin</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}" class="btn btn-sm btn-outline">Login</a></li>
+                    <li><a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ── Flash Messages ─────────────────────── -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" id="flashMessages">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- ── Main Content ───────────────────────── -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ── Footer ─────────────────────────────── -->
+    {% block footer %}
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-brand">Drive<span>ra</span></div>
+                    <p class="footer-desc">B2B fleet rentals, simplified. Search, compare, and book fleets from verified suppliers across India.</p>
+                </div>
+                <div class="footer-links">
+                    <div>
+                        <h4>Platform</h4>
+                        <ul>
+                            <li><a href="{{ url_for('booking') }}">Book a Fleet</a></li>
+                            <li><a href="{{ url_for('suppliers') }}">Suppliers</a></li>
+                            <li><a href="{{ url_for('register') }}">Sign Up</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Drivera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- ── Scripts ────────────────────────────── -->
+    <script src="{{ url_for('static', filename='js/maps.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

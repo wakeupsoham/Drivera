@@ -1,0 +1,142 @@
+1. Product Requirements Document (PRD)
+1.1 Project Overview
+Drivera is a B2B fleet rental web platform that connects businesses needing bulk vehicle rentals with verified fleet suppliers. The platform simplifies the traditionally fragmented vehicle rental market by offering centralized search, bulk booking, supplier verification, and fleet management in a single interface.
+1.2 Problem Statement
+Businesses requiring bulk vehicle rentals — logistics firms, event companies, corporate travel departments — face three core friction points:
+▸	No single platform for bulk B2B fleet searches across multiple suppliers
+▸	No standardized supplier verification or trust mechanism
+▸	Manual booking processes lacking real-time availability and centralized billing
+1.3 Objectives
+▸	Allow businesses (renters) to search, compare, and book fleets in bulk
+▸	Allow suppliers to list fleets, manage availability, and receive bookings
+▸	Implement a supplier verification layer ('Verified Supplier' badge)
+▸	Provide a real-time map-based supplier discovery interface
+▸	Support fleet tracking dashboard post-booking
+1.4 Target Users
+Primary — Renters
+▸	Corporate travel and logistics managers
+▸	Event management companies
+▸	SMEs requiring temporary fleet expansion
+Secondary — Suppliers
+▸	Fleet owners with 10+ vehicles
+▸	Vehicle rental agencies offering B2B contracts
+1.5 Functional Requirements
+1.5.1 Landing Page / Home
+▸	Hero section: 'Fleet Rentals, Simplified for Business' with CTA buttons (Book a Fleet, For Suppliers)
+▸	How it Works: Search & Select → Book in Bulk → Manage & Track
+▸	Why Drivera: Bulk Booking, Centralized Billing, Real-time Tracking, Verified Suppliers
+1.5.2 User (Renter) Module
+▸	Register/Login with email
+▸	Search suppliers by: location, vehicle type, fleet size, date range
+▸	Map view with supplier pins and popup cards (distance, rating, price/day, availability)
+▸	List view with supplier cards (verified badge, fleet count, rating, pricing)
+▸	Bulk booking with fleet size selection and date picker
+▸	Booking confirmation and history dashboard
+1.5.3 Supplier Module
+▸	Register as supplier with company details
+▸	List fleet inventory: vehicle type, count, price/day, location
+▸	View and manage incoming booking requests
+▸	Verification application (admin-approved 'Verified Supplier' badge)
+1.5.4 Admin Module
+▸	Approve/reject supplier verification requests
+▸	View platform-wide booking and revenue metrics
+▸	Manage users and suppliers
+1.6 Non-Functional Requirements
+▸	Response time < 2 seconds for search queries
+▸	Mobile-responsive layout across all pages
+▸	SQL injection prevention via parameterized queries (Flask-MySQL)
+▸	Password hashing with bcrypt
+▸	SDLC documentation: SRS, ER Diagram, Normalized Schema, Test Cases
+1.7 Out of Scope (for this submission)
+▸	Payment gateway integration
+▸	Real-time GPS vehicle tracking
+▸	Native mobile app
+ 
+2. Technology Stack
+2.1 Stack Overview
+
+Layer	Technology	Rationale
+Frontend	HTML5 + CSS3 + Vanilla JS	No framework overhead; full control; matches Drivera design system
+Backend	Python 3.11 + Flask 3.x	Lightweight, fast to scaffold, strong MySQL ecosystem
+Database	MySQL 8.x	Matches DBMS practical schema; familiar SQL, SPPU-compliant
+ORM / DB	Flask-MySQLdb / mysql-connector-python	Direct query control; no abstraction hiding SQL
+Auth	Flask-Login + bcrypt	Session management + secure password hashing
+Maps	Google Maps JS Embed API (free tier)	Supplier location pins matching Drivera booking screen
+Deployment	Render (free web service)	Free, GitHub-connected, persistent DB via PlanetScale or Railway
+IDE	Google Antigravity	Agent-first scaffolding, terminal + browser automation
+Version Control	Git + GitHub	Required for Render deployment pipeline
+
+2.2 Project File Structure
+drivera/
+├── app.py                  # Flask app entry point
+├── config.py               # DB credentials, secret key
+├── requirements.txt
+├── templates/
+│   ├── base.html           # Shared navbar/footer
+│   ├── index.html          # Landing page
+│   ├── booking.html        # Map + search
+│   ├── suppliers.html      # Supplier listing
+│   ├── dashboard.html      # Renter booking history
+│   └── admin.html          # Admin panel
+├── static/
+│   ├── css/style.css
+│   ├── js/maps.js
+│   └── img/
+└── db/
+    ├── schema.sql          # Vehicle Rental schema
+    └── seed.sql            # Sample data
+
+2.3 Database Schema (from DBMS Practicals)
+The existing Vehicle Rental Service schema is reused directly. Core tables:
+▸	Customer (customer_id, name, contact, email, license_no)
+▸	Vehicle (vehicle_id, type, model, brand, price_per_day, status)
+▸	Supplier (supplier_id, company_name, location, verified, rating)
+▸	Booking (booking_id, customer_id, supplier_id, vehicle_id, start_date, end_date, total_cost, status)
+▸	Fleet (fleet_id, supplier_id, vehicle_id, available_count)
+ 
+3. Design Documentation
+3.1 Design System
+
+Token	Value	Usage
+Primary	#FF6B35	CTAs, accents, brand orange (Book a Fleet button)
+Dark Navy	#0F172A	Primary background, navbar, footer, code blocks
+Mid Navy	#1E293B	Cards, section backgrounds
+Slate	#334155	Body text, secondary content
+Muted	#64748B	Labels, captions, metadata
+White	#FFFFFF	Foreground text on dark bg
+Success	#22C55E	Verified Supplier badge
+Font — Display	Sora (Google Fonts)	Hero headings, brand name
+Font — Body	DM Sans (Google Fonts)	All body text, UI elements
+Border Radius	8px / 12px / 16px	Cards, buttons, inputs
+Shadow	0 4px 24px rgba(0,0,0,0.18)	Card elevation
+
+3.2 Page-by-Page Design Spec
+Landing Page
+▸	Dark navy (#0F172A) hero with orange gradient text on 'Simplified'
+▸	Two CTAs: 'Book a Fleet' (orange filled) and 'For Suppliers' (outline white)
+▸	'How it Works' — 3-card grid with icon, title, description on #1E293B cards
+▸	'Why Drivera' — 4-column icon grid (Bulk Booking, Centralized Billing, Real-time Tracking, Verified Suppliers)
+▸	Footer: dark navy, logo left, nav links right
+User Booking Screen (Map View)
+▸	Left panel: search bar, Vehicle Type dropdown, Date Range picker, Fleet Size filter
+▸	Supplier list cards: thumbnail, company name, distance badge, vehicle count, price/day, star rating
+▸	Right panel: Google Maps embed with orange location pins
+▸	Map popup on pin click: company name, vehicle count, price/day, rating
+▸	Sticky CTA: 'Book Selected Fleet' (full-width orange button)
+Supplier Listing Screen
+▸	Top filter bar: Location, Vehicle Type, Availability, Rating dropdowns
+▸	3-column card grid: supplier photo, name, city, vehicle count, description excerpt, rating
+▸	'Verified Supplier' green badge (top-right of card) for approved suppliers
+▸	Hover state: card lifts with box-shadow, orange border-top accent
+3.3 Component States
+Component	Default	Hover	Active/Selected
+CTA Button	Orange fill, white text	Darken 10%, slight scale(1.02)	Scale(0.98), darker
+Supplier Card	Dark card, subtle shadow	Lift + orange top border	Orange ring outline
+Filter Dropdown	Slate border, navy bg	Orange border glow	Orange underline
+Map Pin	Orange teardrop	Scale up + shadow	White fill + orange border
+Verified Badge	Green pill #22C55E	No change	N/A
+
+3.4 Responsive Breakpoints
+▸	≥ 1280px (Desktop): Full 3-column supplier grid, map + list side-by-side
+▸	768–1279px (Tablet): 2-column grid, map collapses below list
+▸	< 768px (Mobile): Single column, map becomes toggle-able overlay

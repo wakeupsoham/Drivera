@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Suppliers — Drivera{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:120px;">
+    <div class="container">
+        <div class="section-header">
+            <h2>Fleet <span class="text-gradient">Suppliers</span></h2>
+            <p>Browse verified fleet suppliers across India. Filter by location, vehicle type, and rating.</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;justify-content:center;" id="supplierFilters">
+            <select class="form-control" style="max-width:200px;" id="filterLocation">
+                <option value="">All Locations</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Pune">Pune</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Hyderabad">Hyderabad</option>
+            </select>
+            <select class="form-control" style="max-width:200px;" id="filterVehicleType">
+                <option value="">All Vehicle Types</option>
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Mini Bus">Mini Bus</option>
+                <option value="Van">Van</option>
+                <option value="Luxury">Luxury</option>
+                <option value="Electric">Electric</option>
+            </select>
+            <select class="form-control" style="max-width:200px;" id="filterRating">
+                <option value="">Any Rating</option>
+                <option value="4">4+ Stars</option>
+                <option value="3">3+ Stars</option>
+            </select>
+        </div>
+
+        <!-- Supplier Grid -->
+        <div class="grid grid-3">
+            {% for s in suppliers %}
+            <div class="card supplier-card animate-on-scroll">
+                {% if s[8] == 1 %}
+                    <span class="badge badge-verified verified-badge">✓ Verified Supplier</span>
+                {% endif %}
+
+                <!-- Supplier Avatar -->
+                <div style="width:64px;height:64px;border-radius:var(--radius-sm);background:linear-gradient(135deg, var(--primary), var(--primary-dark));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--white);font-family:var(--font-display);">
+                    {{ s[1][0] }}
+                </div>
+
+                <div class="supplier-info">
+                    <h3 style="font-size:1.15rem;">{{ s[1] }}</h3>
+                    <p style="color:var(--muted);font-size:0.9rem;margin-top:4px;">{{ s[5] }}</p>
+                    {% if s[10] %}
+                    <p style="color:var(--light-muted);font-size:0.85rem;margin-top:8px;line-height:1.5;">
+                        {{ s[10][:100] }}{% if s[10]|length > 100 %}...{% endif %}
+                    </p>
+                    {% endif %}
+
+                    <div class="supplier-meta">
+                        <span>🚗 {{ s[12] or 0 }} vehicles</span>
+                        <span>📦 {{ s[11] or 0 }} fleet types</span>
+                        <span class="star-rating">⭐ {{ s[9] }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('booking') }}" class="btn btn-sm btn-primary" style="margin-top:20px;width:100%;">
+                    View Fleet →
+                </a>
+            </div>
+            {% endfor %}
+
+            {% if suppliers|length == 0 %}
+            <div style="grid-column:1/-1;text-align:center;padding:80px 0;">
+                <p style="font-size:2rem;margin-bottom:8px;">🔍</p>
+                <h3>No suppliers found</h3>
+                <p class="text-muted" style="margin-top:8px;">Try adjusting your filters or check back later.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
