@@ -151,6 +151,31 @@ def suppliers():
     return render_template('suppliers.html', suppliers=suppliers)
 
 
+# ── Register Supplier ────────────────────────────────────────────
+@app.route('/register_supplier', methods=['POST'])
+def register_supplier():
+    company_name = request.form.get('company_name')
+    location = request.form.get('location')
+    email = request.form.get('email')
+    
+    # Optional: could also handle vehicle_type here to create an initial fleet/vehicle record
+    
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO Supplier (company_name, location, email, rating, verified) VALUES (%s, %s, %s, 4.0, 0)",
+            (company_name, location, email)
+        )
+        mysql.connection.commit()
+        flash('Application submitted! Our team will contact you for verification.', 'success')
+    except Exception as e:
+        flash(f'Registration failed: {str(e)}', 'danger')
+    finally:
+        cur.close()
+        
+    return redirect(url_for('suppliers'))
+
+
 # ── Create Booking ───────────────────────────────────────────────
 @app.route('/book', methods=['POST'])
 @login_required

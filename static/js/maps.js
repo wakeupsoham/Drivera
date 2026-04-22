@@ -47,45 +47,30 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ── Google Maps Initialization ───────────────
-// Note: Replace YOUR_API_KEY in the script tag with an actual Google Maps API key
+// ── Leaflet Maps Initialization ───────────────
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+});
+
 function initMap() {
     const mapElement = document.getElementById('map');
     if (!mapElement) return;
 
     // Default center: India
-    const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+    const defaultCenter = [20.5937, 78.9629];
 
-    const map = new google.maps.Map(mapElement, {
-        zoom: 5,
-        center: defaultCenter,
-        styles: [
-            // Dark theme style for map
-            { elementType: 'geometry', stylers: [{ color: '#1E293B' }] },
-            { elementType: 'labels.text.stroke', stylers: [{ color: '#0F172A' }] },
-            { elementType: 'labels.text.fill', stylers: [{ color: '#64748B' }] },
-            {
-                featureType: 'road',
-                elementType: 'geometry',
-                stylers: [{ color: '#334155' }]
-            },
-            {
-                featureType: 'water',
-                elementType: 'geometry',
-                stylers: [{ color: '#0F172A' }]
-            },
-            {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }]
-            }
-        ]
-    });
+    const map = L.map('map').setView(defaultCenter, 5);
+
+    // Using CartoDB Dark Matter for the dark theme feel 
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
 
     // Add supplier markers from data attributes
     const supplierItems = document.querySelectorAll('.supplier-list-item');
     const markers = [];
-    const infoWindow = new google.maps.InfoWindow();
 
     supplierItems.forEach(item => {
         const lat = parseFloat(item.dataset.lat);
@@ -98,47 +83,43 @@ function initMap() {
 
         if (isNaN(lat) || isNaN(lng)) return;
 
-        const marker = new google.maps.Marker({
-            position: { lat, lng },
-            map: map,
-            title: name,
-            icon: {
-                path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                scale: 7,
-                fillColor: '#FF6B35',
-                fillOpacity: 1,
-                strokeColor: '#E55A2B',
-                strokeWeight: 2
-            }
+        const customIcon = L.divIcon({
+            className: 'custom-map-icon',
+            html: `<div style="background-color: #FF6B35; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.5);"></div>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
         });
+
+        const marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
 
         const verifiedBadge = verified
             ? '<span style="color:#22C55E;font-weight:600;">✓ Verified</span>'
             : '';
 
-        marker.addListener('click', () => {
-            infoWindow.setContent(`
-                <div style="font-family:'DM Sans',sans-serif;color:#0F172A;padding:4px;min-width:200px;">
-                    <h3 style="font-family:'Sora',sans-serif;margin:0 0 6px;font-size:1rem;">${name}</h3>
-                    ${verifiedBadge}
-                    <p style="margin:6px 0;font-size:0.85rem;color:#334155;">
-                        🚗 ${vehicles} vehicles &nbsp;|&nbsp; ⭐ ${rating}
-                    </p>
-                    <p style="margin:0;font-size:0.9rem;font-weight:600;color:#FF6B35;">
-                        From ₹${price}/day
-                    </p>
-                </div>
-            `);
-            infoWindow.open(map, marker);
-        });
+        const popupContent = `
+            <div style="font-family:'DM Sans',sans-serif;color:#0F172A;padding:4px;min-width:200px;">
+                <h3 style="font-family:'Sora',sans-serif;margin:0 0 6px;font-size:1rem;">${name}</h3>
+                ${verifiedBadge}
+                <p style="margin:6px 0;font-size:0.85rem;color:#334155;">
+                    🚗 ${vehicles} vehicles &nbsp;|&nbsp; ⭐ ${rating}
+                </p>
+                <p style="margin:0;font-size:0.9rem;font-weight:600;color:#FF6B35;">
+                    From ₹${price}/day
+                </p>
+            </div>
+        `;
 
+        marker.bindPopup(popupContent, {
+            closeButton: false,
+            offset: [0, -10]
+        });
         markers.push(marker);
 
         // Highlight supplier card on marker hover
-        marker.addListener('mouseover', () => {
+        marker.on('mouseover', () => {
             item.style.borderColor = '#FF6B35';
         });
-        marker.addListener('mouseout', () => {
+        marker.on('mouseout', () => {
             if (!item.classList.contains('selected')) {
                 item.style.borderColor = 'rgba(255,255,255,0.06)';
             }
@@ -146,9 +127,8 @@ function initMap() {
 
         // Click supplier card to pan to marker
         item.addEventListener('click', () => {
-            map.panTo({ lat, lng });
-            map.setZoom(12);
-            google.maps.event.trigger(marker, 'click');
+            map.flyTo([lat, lng], 12);
+            marker.openPopup();
 
             supplierItems.forEach(i => i.classList.remove('selected'));
             item.classList.add('selected');
@@ -168,8 +148,7 @@ function initMap() {
 
     // Fit bounds to all markers
     if (markers.length > 0) {
-        const bounds = new google.maps.LatLngBounds();
-        markers.forEach(m => bounds.extend(m.getPosition()));
-        map.fitBounds(bounds);
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds(), {padding: [30, 30]});
     }
 }

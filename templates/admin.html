@@ -46,13 +46,13 @@
                 <tbody>
                     {% for s in suppliers %}
                     <tr>
-                        <td>#{{ s[0] }}</td>
-                        <td style="font-weight:600;">{{ s[1] }}</td>
-                        <td>{{ s[2] }}</td>
-                        <td>{{ s[3] }}</td>
-                        <td><span class="star-rating">⭐ {{ s[5] }}</span></td>
+                        <td>#{{ s.supplier_id }}</td>
+                        <td style="font-weight:600;">{{ s.company_name }}</td>
+                        <td>{{ s.email }}</td>
+                        <td>{{ s.location }}</td>
+                        <td><span class="star-rating">⭐ {{ s.rating }}</span></td>
                         <td>
-                            {% if s[4] == 1 %}
+                            {% if s.verified == 1 %}
                                 <span class="badge badge-verified">✓ Verified</span>
                             {% else %}
                                 <span class="badge badge-pending">Pending</span>
@@ -83,15 +83,15 @@
                 <tbody>
                     {% for b in bookings %}
                     <tr>
-                        <td>#{{ b[0] }}</td>
-                        <td>{{ b[1] }}</td>
-                        <td>{{ b[2] }}</td>
-                        <td>{{ b[3] }}</td>
-                        <td>{{ b[4] }}</td>
-                        <td>{{ b[5] }} → {{ b[6] }}</td>
-                        <td style="font-weight:600;color:var(--primary);">₹{{ b[7]|int }}</td>
+                        <td>#{{ b.booking_id }}</td>
+                        <td>{{ b.name }}</td>
+                        <td>{{ b.company_name }}</td>
+                        <td>{{ b.model }}</td>
+                        <td>{{ b.fleet_size }}</td>
+                        <td>{{ b.start_date }} → {{ b.end_date }}</td>
+                        <td style="font-weight:600;color:var(--primary);">₹{{ b.total_cost|int }}</td>
                         <td>
-                            <span class="badge badge-{{ b[8] }}">{{ b[8]|capitalize }}</span>
+                            <span class="badge badge-{{ b.status }}">{{ b.status|capitalize }}</span>
                         </td>
                     </tr>
                     {% endfor %}

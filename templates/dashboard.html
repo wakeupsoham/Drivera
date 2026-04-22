@@ -20,19 +20,19 @@
             </div>
             <div class="stat-card">
                 <div class="stat-value">
-                    {{ bookings|selectattr(9, 'equalto', 'confirmed')|list|length }}
+                    {{ bookings|selectattr('status', 'equalto', 'confirmed')|list|length }}
                 </div>
                 <div class="stat-label">Confirmed</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">
-                    {{ bookings|selectattr(9, 'equalto', 'pending')|list|length }}
+                    {{ bookings|selectattr('status', 'equalto', 'pending')|list|length }}
                 </div>
                 <div class="stat-label">Pending</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">
-                    ₹{{ bookings|sum(attribute=8)|int if bookings else 0 }}
+                    ₹{{ bookings|sum(attribute='total_cost')|int if bookings else 0 }}
                 </div>
                 <div class="stat-label">Total Spent</div>
             </div>
@@ -58,14 +58,14 @@
                 <tbody>
                     {% for b in bookings %}
                     <tr>
-                        <td>#{{ b[0] }}</td>
-                        <td>{{ b[1] }}</td>
-                        <td>{{ b[2] }} {{ b[3] }} <span class="text-muted">({{ b[4] }})</span></td>
-                        <td>{{ b[5] }} vehicles</td>
-                        <td>{{ b[6] }} → {{ b[7] }}</td>
-                        <td style="font-weight:600;color:var(--primary);">₹{{ b[8]|int }}</td>
+                        <td>#{{ b.booking_id }}</td>
+                        <td>{{ b.company_name }}</td>
+                        <td>{{ b.brand }} {{ b.model }} <span class="text-muted">({{ b.type }})</span></td>
+                        <td>{{ b.fleet_size }} vehicles</td>
+                        <td>{{ b.start_date }} → {{ b.end_date }}</td>
+                        <td style="font-weight:600;color:var(--primary);">₹{{ b.total_cost|int }}</td>
                         <td>
-                            <span class="badge badge-{{ b[9] }}">{{ b[9]|capitalize }}</span>
+                            <span class="badge badge-{{ b.status }}">{{ b.status|capitalize }}</span>
                         </td>
                     </tr>
                     {% endfor %}

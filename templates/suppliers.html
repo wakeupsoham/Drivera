@@ -40,28 +40,28 @@
         <div class="grid grid-3">
             {% for s in suppliers %}
             <div class="card supplier-card animate-on-scroll">
-                {% if s[8] == 1 %}
+                {% if s.verified == 1 %}
                     <span class="badge badge-verified verified-badge">✓ Verified Supplier</span>
                 {% endif %}
 
                 <!-- Supplier Avatar -->
                 <div style="width:64px;height:64px;border-radius:var(--radius-sm);background:linear-gradient(135deg, var(--primary), var(--primary-dark));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--white);font-family:var(--font-display);">
-                    {{ s[1][0] }}
+                    {{ s.company_name[0] }}
                 </div>
 
                 <div class="supplier-info">
-                    <h3 style="font-size:1.15rem;">{{ s[1] }}</h3>
-                    <p style="color:var(--muted);font-size:0.9rem;margin-top:4px;">{{ s[5] }}</p>
-                    {% if s[10] %}
+                    <h3 style="font-size:1.15rem;">{{ s.company_name }}</h3>
+                    <p style="color:var(--muted);font-size:0.9rem;margin-top:4px;">{{ s.location }}</p>
+                    {% if s.description %}
                     <p style="color:var(--light-muted);font-size:0.85rem;margin-top:8px;line-height:1.5;">
-                        {{ s[10][:100] }}{% if s[10]|length > 100 %}...{% endif %}
+                        {{ s.description[:100] }}{% if s.description|length > 100 %}...{% endif %}
                     </p>
                     {% endif %}
 
                     <div class="supplier-meta">
-                        <span>🚗 {{ s[12] or 0 }} vehicles</span>
-                        <span>📦 {{ s[11] or 0 }} fleet types</span>
-                        <span class="star-rating">⭐ {{ s[9] }}</span>
+                        <span>🚗 {{ s.total_vehicles or 0 }} vehicles</span>
+                        <span>📦 {{ s.fleet_types or 0 }} fleet types</span>
+                        <span class="star-rating">⭐ {{ s.rating }}</span>
                     </div>
                 </div>
 
@@ -78,6 +78,63 @@
                 <p class="text-muted" style="margin-top:8px;">Try adjusting your filters or check back later.</p>
             </div>
             {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Partner Section -->
+<section class="section" style="background:var(--bg-darker);border-top:1px solid var(--border-color);">
+    <div class="container">
+        <div class="grid grid-2" style="align-items:center;gap:60px;">
+            <div class="animate-on-scroll">
+                <span class="badge badge-primary">Partnership</span>
+                <h2 style="font-size:2.5rem;margin-top:1rem;">List Your <span class="text-gradient">Vehicle</span> as a Supplier</h2>
+                <p style="font-size:1.1rem;color:var(--muted);margin:20px 0 30px;">
+                    Join India's fastest growing B2B fleet network. Reach thousands of businesses looking for reliable logistics and transportation partners.
+                </p>
+                <ul style="list-style:none;padding:0;margin-bottom:30px;">
+                    <li style="margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+                        <span style="color:var(--primary);font-weight:bold;">✓</span> Guaranteed Monthly Bookings
+                    </li>
+                    <li style="margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+                        <span style="color:var(--primary);font-weight:bold;">✓</span> Real-time Fleet Management
+                    </li>
+                    <li style="margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+                        <span style="color:var(--primary);font-weight:bold;">✓</span> Secure Payments & Escrow
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card animate-on-scroll" style="padding:40px;border:1px solid var(--primary-light);">
+                <h3 style="margin-bottom:20px;">Supplier Registration</h3>
+                <form action="{{ url_for('register_supplier') }}" method="POST">
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:5px;font-size:0.9rem;">Company Name</label>
+                        <input type="text" name="company_name" class="form-control" placeholder="e.g. Speedline Logistics" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:5px;font-size:0.9rem;">Location</label>
+                        <input type="text" name="location" class="form-control" placeholder="e.g. Mumbai, Maharashtra" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:5px;font-size:0.9rem;">Primary Vehicle Type</label>
+                        <select name="vehicle_type" class="form-control" required>
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Mini Bus">Mini Bus</option>
+                            <option value="Van">Van</option>
+                            <option value="Luxury">Luxury</option>
+                            <option value="Electric">Electric</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label style="display:block;margin-bottom:5px;font-size:0.9rem;">Contact Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="partner@yourcompany.com" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Apply to Join →</button>
+                </form>
+            </div>
         </div>
     </div>
 </section>

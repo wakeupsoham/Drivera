@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Book a Fleet — Drivera{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
 {% block footer %}{% endblock %}
 
 {% block content %}
@@ -58,29 +63,29 @@
         <!-- Supplier List -->
         {% for s in suppliers %}
         <div class="supplier-list-item"
-             data-id="{{ s[0] }}"
-             data-lat="{{ s[3] }}"
-             data-lng="{{ s[4] }}"
-             data-name="{{ s[1] }}"
-             data-vehicles="{{ s[9] or 0 }}"
-             data-price="{{ s[10] or 'N/A' }}"
-             data-rating="{{ s[6] }}"
-             data-verified="{{ s[5] }}">
+             data-id="{{ s.supplier_id }}"
+             data-lat="{{ s.latitude }}"
+             data-lng="{{ s.longitude }}"
+             data-name="{{ s.company_name }}"
+             data-vehicles="{{ s.total_vehicles or 0 }}"
+             data-price="{{ s.min_price or 'N/A' }}"
+             data-rating="{{ s.rating }}"
+             data-verified="{{ s.verified }}">
             <div class="flex-between">
                 <div>
-                    <strong style="font-size:0.95rem;">{{ s[1] }}</strong>
-                    {% if s[5] == 1 %}
+                    <strong style="font-size:0.95rem;">{{ s.company_name }}</strong>
+                    {% if s.verified == 1 %}
                         <span class="badge badge-verified" style="margin-left:8px;font-size:0.65rem;">✓ Verified</span>
                     {% endif %}
                 </div>
-                <span class="star-rating">⭐ {{ s[6] }}</span>
+                <span class="star-rating">⭐ {{ s.rating }}</span>
             </div>
             <div style="margin-top:8px;display:flex;gap:16px;color:var(--muted);font-size:0.85rem;">
-                <span>📍 {{ s[2] }}</span>
-                <span>🚗 {{ s[9] or 0 }} vehicles</span>
+                <span>📍 {{ s.location }}</span>
+                <span>🚗 {{ s.total_vehicles or 0 }} vehicles</span>
             </div>
             <div style="margin-top:8px;font-weight:600;color:var(--primary);font-size:0.9rem;">
-                From ₹{{ s[10] or '—' }}/day
+                From ₹{{ s.min_price or '—' }}/day
             </div>
         </div>
         {% endfor %}
@@ -99,13 +104,7 @@
 
     <!-- ── Map Panel ──────────────────────── -->
     <div class="booking-map">
-        <div id="map" style="width:100%;height:100%;min-height:600px;background:var(--slate);display:flex;align-items:center;justify-content:center;">
-            <div style="text-align:center;color:var(--muted);">
-                <p style="font-size:2rem;margin-bottom:8px;">🗺️</p>
-                <p>Map loads with Google Maps API key</p>
-                <p style="font-size:0.85rem;margin-top:4px;">Add your API key to enable interactive map</p>
-            </div>
-        </div>
+        <div id="map" style="width:100%;height:100%;min-height:600px;background:var(--slate);z-index: 1;"></div>
     </div>
 </div>
 {% endblock %}
