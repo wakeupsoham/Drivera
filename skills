@@ -51,6 +51,7 @@ Secondary — Suppliers
 ▸	Payment gateway integration
 ▸	Real-time GPS vehicle tracking
 ▸	Native mobile app
+▸	Live deployment (running locally for this submission)
  
 2. Technology Stack
 2.1 Stack Overview
@@ -62,9 +63,8 @@ Database	MySQL 8.x	Matches DBMS practical schema; familiar SQL, SPPU-compliant
 ORM / DB	Flask-MySQLdb / mysql-connector-python	Direct query control; no abstraction hiding SQL
 Auth	Flask-Login + bcrypt	Session management + secure password hashing
 Maps	Google Maps JS Embed API (free tier)	Supplier location pins matching Drivera booking screen
-Deployment	Render (free web service)	Free, GitHub-connected, persistent DB via PlanetScale or Railway
 IDE	Google Antigravity	Agent-first scaffolding, terminal + browser automation
-Version Control	Git + GitHub	Required for Render deployment pipeline
+Version Control	Git + GitHub	Local and remote source code management
 
 2.2 Project File Structure
 drivera/

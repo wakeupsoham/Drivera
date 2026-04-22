@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
-from flask_mysqldb import MySQL
+import mysql.connector
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import bcrypt
 from config import Config
@@ -8,8 +8,14 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# ── MySQL ────────────────────────────────────────────────────────
-mysql = MySQL(app)
+# ── MySQL Connection Helper ─────────────────────────────────────
+def get_db():
+    return mysql.connector.connect(
+        host=app.config['MYSQL_HOST'],
+        user=app.config['MYSQL_USER'],
+        password=app.config['MYSQL_PASSWORD'],
+        database=app.config['MYSQL_DB']
+    )
 
 # ── Flask-Login ──────────────────────────────────────────────────
 login_manager = LoginManager(app)
@@ -28,10 +34,12 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("SELECT customer_id, name, email, role FROM Customer WHERE customer_id = %s", (user_id,))
     row = cur.fetchone()
     cur.close()
+    db.close()
     if row:
         return User(id=row['customer_id'], name=row['name'], email=row['email'], role=row['role'])
     return None
@@ -60,20 +68,22 @@ def register():
 
         password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        cur = mysql.connection.cursor()
+        db = get_db()
+        cur = db.cursor(dictionary=True)
         try:
             cur.execute(
                 """INSERT INTO Customer (name, email, password_hash, contact, license_no, company_name)
                    VALUES (%s, %s, %s, %s, %s, %s)""",
                 (name, email, password_hash, contact, license_no, company_name)
             )
-            mysql.connection.commit()
+            db.commit()
             flash('Registration successful! Please log in.', 'success')
             return redirect(url_for('login'))
         except Exception as e:
             flash(f'Registration failed: {str(e)}', 'danger')
         finally:
             cur.close()
+            db.close()
     return render_template('register.html')
 
 
@@ -84,10 +94,12 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        cur = mysql.connection.cursor()
+        db = get_db()
+        cur = db.cursor(dictionary=True)
         cur.execute("SELECT customer_id, name, email, password_hash, role FROM Customer WHERE email = %s", (email,))
         row = cur.fetchone()
         cur.close()
+        db.close()
 
         if row and bcrypt.checkpw(password.encode('utf-8'), row['password_hash'].encode('utf-8')):
             user = User(id=row['customer_id'], name=row['name'], email=row['email'], role=row['role'])
@@ -112,13 +124,15 @@ def logout():
 # ── Booking Page (Map + Search) ──────────────────────────────────
 @app.route('/booking')
 def booking():
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("""
         SELECT s.supplier_id, s.company_name, s.location, s.latitude, s.longitude,
                s.verified, s.rating, s.description,
                COUNT(f.fleet_id) AS fleet_types,
                SUM(f.available_count) AS total_vehicles,
-               MIN(v.price_per_day) AS min_price
+               MIN(v.price_per_day) AS min_price,
+               GROUP_CONCAT(DISTINCT v.type) AS vehicle_types
         FROM Supplier s
         LEFT JOIN Fleet f ON s.supplier_id = f.supplier_id
         LEFT JOIN Vehicle v ON f.vehicle_id = v.vehicle_id
@@ -126,6 +140,7 @@ def booking():
     """)
     suppliers = cur.fetchall()
     cur.close()
+    db.close()
     
     if request.headers.get('Accept') == 'application/json':
         from flask import jsonify
@@ -137,7 +152,8 @@ def booking():
 # ── Suppliers Listing ────────────────────────────────────────────
 @app.route('/suppliers')
 def suppliers():
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("""
         SELECT s.*, COUNT(f.fleet_id) AS fleet_types,
                SUM(f.available_count) AS total_vehicles
@@ -148,6 +164,7 @@ def suppliers():
     """)
     suppliers = cur.fetchall()
     cur.close()
+    db.close()
     return render_template('suppliers.html', suppliers=suppliers)
 
 
@@ -160,18 +177,20 @@ def register_supplier():
     
     # Optional: could also handle vehicle_type here to create an initial fleet/vehicle record
     
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     try:
         cur.execute(
             "INSERT INTO Supplier (company_name, location, email, rating, verified) VALUES (%s, %s, %s, 4.0, 0)",
             (company_name, location, email)
         )
-        mysql.connection.commit()
+        db.commit()
         flash('Application submitted! Our team will contact you for verification.', 'success')
     except Exception as e:
         flash(f'Registration failed: {str(e)}', 'danger')
     finally:
         cur.close()
+        db.close()
         
     return redirect(url_for('suppliers'))
 
@@ -192,7 +211,8 @@ def book():
 
     try:
         fleet_size = int(fleet_size)
-        cur = mysql.connection.cursor()
+        db = get_db()
+        cur = db.cursor() # Keep as tuple here since access is vehicle[0]
         
         # Find a vehicle of that type belonging to the supplier
         cur.execute("""
@@ -205,6 +225,8 @@ def book():
         vehicle = cur.fetchone()
         
         if not vehicle:
+            cur.close()
+            db.close()
             flash('Selected supplier does not have the chosen vehicle type.', 'danger')
             return redirect(url_for('booking'))
             
@@ -227,8 +249,9 @@ def book():
             VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending')
         """, (current_user.id, supplier_id, vehicle_id, fleet_size, start_date, end_date, total_cost))
         
-        mysql.connection.commit()
+        db.commit()
         cur.close()
+        db.close()
         
         flash('Booking submitted successfully!', 'success')
         return redirect(url_for('dashboard'))
@@ -242,7 +265,8 @@ def book():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("""
         SELECT b.booking_id, s.company_name, v.brand, v.model, v.type,
                b.fleet_size, b.start_date, b.end_date, b.total_cost, b.status
@@ -254,6 +278,7 @@ def dashboard():
     """, (current_user.id,))
     bookings = cur.fetchall()
     cur.close()
+    db.close()
     return render_template('dashboard.html', bookings=bookings)
 
 
@@ -265,8 +290,9 @@ def admin():
         flash('Access denied. Admin only.', 'danger')
         return redirect(url_for('index'))
 
-    cur = mysql.connection.cursor()
-
+    db = get_db()
+    cur = db.cursor() # tuple cursor for simple aggregates
+    
     cur.execute("SELECT COUNT(*) FROM Customer")
     total_customers = cur.fetchone()[0]
 
@@ -278,7 +304,9 @@ def admin():
 
     cur.execute("SELECT COALESCE(SUM(total_cost), 0) FROM Booking WHERE status = 'confirmed'")
     total_revenue = cur.fetchone()[0]
-
+    cur.close()
+    
+    cur = db.cursor(dictionary=True) # Switch to dictionary for list data
     cur.execute("""
         SELECT s.supplier_id, s.company_name, s.email, s.location, s.verified, s.rating
         FROM Supplier s ORDER BY s.created_at DESC
@@ -297,6 +325,7 @@ def admin():
     bookings = cur.fetchall()
 
     cur.close()
+    db.close()
     return render_template('admin.html',
                            total_customers=total_customers,
                            total_suppliers=total_suppliers,

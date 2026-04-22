@@ -151,4 +151,47 @@ function initMap() {
         const group = new L.featureGroup(markers);
         map.fitBounds(group.getBounds(), {padding: [30, 30]});
     }
+
+    // ── Filtering Logic ─────────────────────────
+    const searchLocation = document.getElementById('searchLocation');
+    const vehicleTypeSelect = document.getElementById('vehicleType');
+    const fleetSizeSelect = document.getElementById('fleetSize');
+
+    function filterSuppliers() {
+        const locFilter = searchLocation.value.toLowerCase();
+        const typeFilter = vehicleTypeSelect.value;
+        const sizeFilter = parseInt(fleetSizeSelect.value) || 0;
+
+        let visibleCount = 0;
+
+        supplierItems.forEach((item, index) => {
+            const loc = (item.dataset.location || '').toLowerCase();
+            const types = (item.dataset.types || '').split(',');
+            const vehicles = parseInt(item.dataset.vehicles) || 0;
+            const marker = markers[index];
+
+            const matchesLoc = loc.includes(locFilter);
+            const matchesType = !typeFilter || types.includes(typeFilter);
+            const matchesSize = vehicles >= sizeFilter;
+
+            if (matchesLoc && matchesType && matchesSize) {
+                item.style.display = 'block';
+                if (marker) marker.addTo(map);
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+                if (marker) map.removeLayer(marker);
+            }
+        });
+
+        // Update count text
+        const countText = document.querySelector('.booking-sidebar h4');
+        if (countText) {
+            countText.textContent = `${visibleCount} Suppliers Found`;
+        }
+    }
+
+    if (searchLocation) searchLocation.addEventListener('input', filterSuppliers);
+    if (vehicleTypeSelect) vehicleTypeSelect.addEventListener('change', filterSuppliers);
+    if (fleetSizeSelect) fleetSizeSelect.addEventListener('change', filterSuppliers);
 }
