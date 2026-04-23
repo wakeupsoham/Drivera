@@ -171,6 +171,10 @@ def suppliers():
 # ── Register Supplier ────────────────────────────────────────────
 @app.route('/register_supplier', methods=['POST'])
 def register_supplier():
+    if not current_user.is_authenticated:
+        flash('Please log in or register to apply as a supplier.', 'warning')
+        return redirect(url_for('login'))
+
     company_name = request.form.get('company_name')
     location = request.form.get('location')
     email = request.form.get('email')
@@ -185,7 +189,7 @@ def register_supplier():
             (company_name, location, email)
         )
         db.commit()
-        flash('Application submitted! Our team will contact you for verification.', 'success')
+        flash('Application sent and will be processed in 3 business days.', 'success')
     except Exception as e:
         flash(f'Registration failed: {str(e)}', 'danger')
     finally:
