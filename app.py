@@ -319,7 +319,7 @@ def dashboard():
 @app.route('/admin')
 @login_required
 def admin():
-    if current_user.role != 'admin':
+    if current_user.email != 'admin@drivera.in':
         flash('Access denied. Admin only.', 'danger')
         return redirect(url_for('index'))
 
@@ -372,7 +372,7 @@ def admin():
 @app.route('/admin/supplier/<int:supplier_id>/<action>', methods=['POST'])
 @login_required
 def admin_manage_supplier(supplier_id, action):
-    if current_user.role != 'admin':
+    if current_user.email != 'admin@drivera.in':
         flash('Access denied.', 'danger')
         return redirect(url_for('index'))
         
@@ -395,7 +395,7 @@ def admin_manage_supplier(supplier_id, action):
 @app.route('/admin/booking/<int:booking_id>/<action>', methods=['POST'])
 @login_required
 def admin_manage_booking(booking_id, action):
-    if current_user.role != 'admin':
+    if current_user.email != 'admin@drivera.in':
         flash('Access denied.', 'danger')
         return redirect(url_for('index'))
         
