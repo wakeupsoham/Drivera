@@ -41,6 +41,7 @@
                         <th>Location</th>
                         <th>Rating</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -56,6 +57,20 @@
                                 <span class="badge badge-verified">✓ Verified</span>
                             {% else %}
                                 <span class="badge badge-pending">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if s.verified == 0 %}
+                            <div style="display:flex;gap:8px;">
+                                <form action="{{ url_for('admin_manage_supplier', supplier_id=s.supplier_id, action='verify') }}" method="POST" style="margin:0;">
+                                    <button type="submit" class="btn btn-sm btn-primary" style="padding:4px 8px;font-size:0.75rem;">Verify</button>
+                                </form>
+                                <form action="{{ url_for('admin_manage_supplier', supplier_id=s.supplier_id, action='reject') }}" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to reject this supplier?');">
+                                    <button type="submit" class="btn btn-sm" style="background:#dc2626;padding:4px 8px;font-size:0.75rem;">Reject</button>
+                                </form>
+                            </div>
+                            {% else %}
+                                <span style="color:var(--muted);font-size:0.8rem;">None</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -78,6 +93,7 @@
                         <th>Dates</th>
                         <th>Cost</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,6 +108,24 @@
                         <td style="font-weight:600;color:var(--primary);">₹{{ b.total_cost|int }}</td>
                         <td>
                             <span class="badge badge-{{ b.status }}">{{ b.status|capitalize }}</span>
+                        </td>
+                        <td>
+                            {% if b.status == 'pending' %}
+                            <div style="display:flex;gap:8px;">
+                                <form action="{{ url_for('admin_manage_booking', booking_id=b.booking_id, action='confirm') }}" method="POST" style="margin:0;">
+                                    <button type="submit" class="btn btn-sm btn-primary" style="padding:4px 8px;font-size:0.75rem;">Confirm</button>
+                                </form>
+                                <form action="{{ url_for('admin_manage_booking', booking_id=b.booking_id, action='cancel') }}" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                    <button type="submit" class="btn btn-sm" style="background:#dc2626;padding:4px 8px;font-size:0.75rem;">Cancel</button>
+                                </form>
+                            </div>
+                            {% elif b.status == 'confirmed' %}
+                            <form action="{{ url_for('admin_manage_booking', booking_id=b.booking_id, action='complete') }}" method="POST" style="margin:0;">
+                                <button type="submit" class="btn btn-sm" style="background:#16a34a;padding:4px 8px;font-size:0.75rem;">Mark Completed</button>
+                            </form>
+                            {% else %}
+                                <span style="color:var(--muted);font-size:0.8rem;">None</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

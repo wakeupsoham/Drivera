@@ -368,6 +368,55 @@ def admin():
                            bookings=bookings)
 
 
+# ── Admin Actions (Interactive Controls) ─────────────────────────
+@app.route('/admin/supplier/<int:supplier_id>/<action>', methods=['POST'])
+@login_required
+def admin_manage_supplier(supplier_id, action):
+    if current_user.role != 'admin':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('index'))
+        
+    db = get_db()
+    cur = db.cursor()
+    
+    if action == 'verify':
+        cur.execute("UPDATE Supplier SET verified = 1 WHERE supplier_id = %s", (supplier_id,))
+        flash(f'Supplier #{supplier_id} has been verified.', 'success')
+    elif action == 'reject':
+        cur.execute("DELETE FROM Supplier WHERE supplier_id = %s", (supplier_id,))
+        flash(f'Supplier #{supplier_id} application rejected.', 'info')
+        
+    db.commit()
+    cur.close()
+    db.close()
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/booking/<int:booking_id>/<action>', methods=['POST'])
+@login_required
+def admin_manage_booking(booking_id, action):
+    if current_user.role != 'admin':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('index'))
+        
+    db = get_db()
+    cur = db.cursor()
+    
+    valid_statuses = {'confirm': 'confirmed', 'cancel': 'cancelled', 'complete': 'completed'}
+    
+    if action in valid_statuses:
+        new_status = valid_statuses[action]
+        cur.execute("UPDATE Booking SET status = %s WHERE booking_id = %s", (new_status, booking_id))
+        flash(f'Booking #{booking_id} status updated to {new_status}.', 'success')
+    else:
+        flash('Invalid action.', 'danger')
+        
+    db.commit()
+    cur.close()
+    db.close()
+    return redirect(url_for('admin'))
+
+
 # ── Run ──────────────────────────────────────────────────────────
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
