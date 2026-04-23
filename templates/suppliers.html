@@ -65,8 +65,8 @@
                     </div>
                 </div>
 
-                <a href="{{ url_for('booking') }}" class="btn btn-sm btn-primary" style="margin-top:20px;width:100%;">
-                    View Fleet →
+                <a href="{{ url_for('supplier_detail', supplier_id=s.supplier_id) }}" class="btn btn-sm btn-primary" style="margin-top:20px;width:100%;" target="_blank">
+                    View Fleet & Profile →
                 </a>
             </div>
             {% endfor %}

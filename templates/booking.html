@@ -86,8 +86,13 @@
                 <span>📍 {{ s.location }}</span>
                 <span>🚗 {{ s.total_vehicles or 0 }} vehicles</span>
             </div>
-            <div style="margin-top:8px;font-weight:600;color:var(--primary);font-size:0.9rem;">
-                From ₹{{ s.min_price or '—' }}/day
+            <div class="flex-between" style="margin-top:8px;">
+                <div style="font-weight:600;color:var(--primary);font-size:0.9rem;">
+                    From ₹{{ s.min_price or '—' }}/day
+                </div>
+                <a href="{{ url_for('supplier_detail', supplier_id=s.supplier_id) }}" target="_blank" style="font-size:0.8rem;color:var(--white);text-decoration:underline;" onclick="event.stopPropagation();">
+                    View Profile ↗
+                </a>
             </div>
         </div>
         {% endfor %}

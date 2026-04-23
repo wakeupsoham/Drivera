@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ supplier.company_name }} — Drivera{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:120px; padding-bottom: 40px; background:var(--bg-darker);">
+    <div class="container">
+        <!-- Supplier Hero -->
+        <div class="card" style="padding:40px; display:flex; gap:30px; align-items:center; flex-wrap:wrap;">
+            <div style="width:120px;height:120px;border-radius:16px;background:linear-gradient(135deg, var(--primary), var(--primary-dark));display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:800;color:var(--white);font-family:var(--font-display);">
+                {{ supplier.company_name[0] }}
+            </div>
+            
+            <div style="flex:1;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                    <h1 style="font-size:2.5rem; margin:0;">{{ supplier.company_name }}</h1>
+                    {% if supplier.verified == 1 %}
+                        <span class="badge badge-verified" style="font-size:0.9rem; padding:4px 10px;">✓ Verified Supplier</span>
+                    {% endif %}
+                </div>
+                
+                <p style="color:var(--muted); font-size:1.1rem; margin-bottom:16px;">📍 {{ supplier.location }}</p>
+                
+                {% if supplier.description %}
+                    <p style="color:var(--light-muted); line-height:1.6; max-width:800px; margin-bottom:20px;">
+                        {{ supplier.description }}
+                    </p>
+                {% endif %}
+                
+                <div style="display:flex; gap:20px; color:var(--white); font-weight:600;">
+                    <span style="background:var(--slate); padding:6px 12px; border-radius:6px;">⭐ {{ supplier.rating }} Rating</span>
+                    <span style="background:var(--slate); padding:6px 12px; border-radius:6px;">✉️ {{ supplier.email }}</span>
+                    {% if supplier.phone %}
+                        <span style="background:var(--slate); padding:6px 12px; border-radius:6px;">📞 {{ supplier.phone }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Contact / Quick Action -->
+            <div style="text-align:center; min-width: 250px; background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="margin-bottom: 15px; font-size:1.2rem;">Ready to book?</h3>
+                <p style="color:var(--muted); font-size:0.9rem; margin-bottom: 20px;">Select a vehicle from the fleet below to start your booking.</p>
+                <a href="#fleet" class="btn btn-primary" style="width:100%;">View Fleet ↓</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fleet Grid Section -->
+<section id="fleet" class="section">
+    <div class="container">
+        <h2 style="margin-bottom:30px; font-family:var(--font-display); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Available Vehicles</h2>
+        
+        <div class="grid grid-3">
+            {% for v in vehicles %}
+            <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:15px;">
+                        <div>
+                            <span class="badge" style="background:rgba(255,255,255,0.1); color:var(--white); margin-bottom:8px; display:inline-block;">{{ v.type }}</span>
+                            <h3 style="font-size:1.4rem;">{{ v.brand }} {{ v.model }}</h3>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:1.5rem; font-weight:bold; color:var(--primary);">₹{{ v.price_per_day }}</span>
+                            <span style="display:block; color:var(--muted); font-size:0.8rem;">per day</span>
+                        </div>
+                    </div>
+                    
+                    <ul style="list-style:none; padding:0; margin: 20px 0; color:var(--light-muted); font-size:0.95rem;">
+                        <li style="margin-bottom:8px;">✓ Well maintained & sanitized</li>
+                        <li style="margin-bottom:8px;">✓ Chauffeur included option</li>
+                        <li style="margin-bottom:8px;">✓ <b>{{ v.available_count }}</b> units currently available</li>
+                    </ul>
+                </div>
+                
+                <form action="{{ url_for('booking') }}" method="GET" style="margin-top:auto;">
+                    <!-- Pre-fill search in booking page -->
+                    <input type="hidden" name="supplier_id" value="{{ supplier.supplier_id }}">
+                    <input type="hidden" name="vehicle_type" value="{{ v.type }}">
+                    <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Book this {{ v.type }}</button>
+                </form>
+            </div>
+            {% else %}
+            <div style="grid-column:1/-1; text-align:center; padding: 40px; background:rgba(255,255,255,0.02); border-radius:12px;">
+                <p>This supplier currently has no vehicles listed.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Trust Indicators / Reviews Hook (Must-have feature addition) -->
+        <div style="margin-top:60px; padding:40px; background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.2); border-radius:12px;">
+            <h3 style="color:#22C55E; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                <span>🛡️</span> Drivera Protection Guarantee
+            </h3>
+            <p style="color:var(--light-muted); line-height:1.6; font-size:0.95rem;">
+                When you book through Drivera, your payments are held securely until the fleet is delivered. In case of any disputes, our 24/7 support team will assist you in finding an immediate replacement. All verified suppliers undergo strict quality and background checks.
+            </p>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}

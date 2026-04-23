@@ -168,6 +168,35 @@ def suppliers():
     return render_template('suppliers.html', suppliers=suppliers)
 
 
+# ── Supplier Profile ──────────────────────────────────────────────
+@app.route('/supplier/<int:supplier_id>')
+def supplier_detail(supplier_id):
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    
+    cur.execute("SELECT * FROM Supplier WHERE supplier_id = %s", (supplier_id,))
+    supplier = cur.fetchone()
+    
+    if not supplier:
+        cur.close()
+        db.close()
+        flash('Supplier not found.', 'warning')
+        return redirect(url_for('suppliers'))
+
+    cur.execute("""
+        SELECT v.vehicle_id, v.type, v.model, v.brand, v.price_per_day, v.status, f.available_count
+        FROM Fleet f
+        JOIN Vehicle v ON f.vehicle_id = v.vehicle_id
+        WHERE f.supplier_id = %s
+    """, (supplier_id,))
+    vehicles = cur.fetchall()
+    
+    cur.close()
+    db.close()
+    
+    return render_template('supplier_detail.html', supplier=supplier, vehicles=vehicles)
+
+
 # ── Register Supplier ────────────────────────────────────────────
 @app.route('/register_supplier', methods=['POST'])
 def register_supplier():
