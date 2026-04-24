@@ -6,6 +6,12 @@
 CREATE DATABASE IF NOT EXISTS drivera;
 USE drivera;
 
+DROP TABLE IF EXISTS Booking;
+DROP TABLE IF EXISTS Fleet;
+DROP TABLE IF EXISTS Vehicle;
+DROP TABLE IF EXISTS Customer;
+DROP TABLE IF EXISTS Supplier;
+
 -- --------------------------------------------
 -- Supplier Table
 -- --------------------------------------------
@@ -19,7 +25,6 @@ CREATE TABLE IF NOT EXISTS Supplier (
     latitude DECIMAL(10, 8),
     longitude DECIMAL(11, 8),
     verified TINYINT(1) DEFAULT 0,
-    rating DECIMAL(2, 1) DEFAULT 0.0,
     description TEXT,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

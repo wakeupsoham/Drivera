@@ -39,7 +39,6 @@
                         <th>Company</th>
                         <th>Email</th>
                         <th>Location</th>
-                        <th>Rating</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -51,7 +50,6 @@
                         <td style="font-weight:600;">{{ s.company_name }}</td>
                         <td>{{ s.email }}</td>
                         <td>{{ s.location }}</td>
-                        <td><span class="star-rating">⭐ {{ s.rating }}</span></td>
                         <td>
                             {% if s.verified == 1 %}
                                 <span class="badge badge-verified">✓ Verified</span>

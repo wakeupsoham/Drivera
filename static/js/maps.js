@@ -78,7 +78,6 @@ function initMap() {
         const name = item.dataset.name;
         const vehicles = item.dataset.vehicles || '0';
         const price = item.dataset.price || 'N/A';
-        const rating = item.dataset.rating || '0';
         const verified = item.dataset.verified === '1';
 
         if (isNaN(lat) || isNaN(lng)) return;
@@ -101,7 +100,7 @@ function initMap() {
                 <h3 style="font-family:'Sora',sans-serif;margin:0 0 6px;font-size:1rem;">${name}</h3>
                 ${verifiedBadge}
                 <p style="margin:6px 0;font-size:0.85rem;color:#334155;">
-                    🚗 ${vehicles} vehicles &nbsp;|&nbsp; ⭐ ${rating}
+                    🚗 ${vehicles} vehicles
                 </p>
                 <p style="margin:0;font-size:0.9rem;font-weight:600;color:#FF6B35;">
                     From ₹${price}/day

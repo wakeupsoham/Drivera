@@ -9,17 +9,17 @@ USE drivera;
 -- 10 Suppliers in Major Indian Cities
 -- All passwords are bcrypt hash of 'supplier123'
 -- --------------------------------------------
-INSERT INTO Supplier (company_name, contact_person, email, phone, location, latitude, longitude, verified, rating, description, password_hash) VALUES
-('SpeedFleet Mumbai', 'Rajesh Sharma', 'rajesh@speedfleet.in', '9876543210', 'Mumbai, Maharashtra', 19.0760, 72.8777, 1, 4.8, 'Premier fleet provider in Mumbai with a focus on high-end sedans and SUVs.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Delhi Metro Fleets', 'Anita Gupta', 'anita@delhifleets.in', '9876543211', 'Delhi, NCR', 28.7041, 77.1025, 1, 4.6, 'Largest network of corporate vehicles in the capital region. 24/7 support.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Silicon Valley Rentals', 'Karthik Rao', 'karthik@svrentals.in', '9876543212', 'Bangalore, Karnataka', 12.9716, 77.5946, 1, 4.7, 'Specializing in tech-enabled fleet management for Bangalore startups and giants.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Charminar Chauffeurs', 'Mohammed Ali', 'ali@charminar.in', '9876543213', 'Hyderabad, Telangana', 17.3850, 78.4867, 0, 4.2, 'Reliable bulk rentals for events and corporate travel across Hyderabad.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Pune Prestige Wheels', 'Vikram Deshmukh', 'vikram@punewheels.in', '9876543214', 'Pune, Maharashtra', 18.5204, 73.8567, 1, 4.5, 'Luxury and executive fleet specialists based in the heart of Pune.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Marina Motors Chennai', 'Suresh Kumar', 'suresh@marinamotors.in', '9876543215', 'Chennai, Tamil Nadu', 13.0827, 80.2707, 1, 4.4, 'Leading supplier for automotive and logistics sectors in Southern India.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Victoria Fleet Kolkata', 'Joydeep Ghosh', 'joydeep@victoriafleet.in', '9876543216', 'Kolkata, West Bengal', 22.5726, 88.3639, 0, 4.1, 'Traditional excellence in fleet rentals for the cultural capital.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
- Sabarmati Services', 'Mehul Shah', 'mehul@sabarmati.in', '9876543217', 'Ahmedabad, Gujarat', 23.0225, 72.5714, 1, 4.3, 'Efficient and cost-effective bulk vehicle solutions for Gujarat businesses.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Pink City Rentals', 'Padma Singh', 'padma@pinkcity.in', '9876543218', 'Jaipur, Rajasthan', 26.9124, 75.7873, 0, 4.0, 'Bespoke fleet rentals for the tourism and hospitality hub of Jaipur.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu'),
-('Diamond City Fleets', 'Rohan Mehta', 'rohan@diamondcity.in', '9876543219', 'Surat, Gujarat', 21.1702, 72.8311, 1, 4.4, 'Robust fleet inventory supporting the diamond and textile industries of Surat.', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu');
+INSERT INTO Supplier (company_name, contact_person, email, phone, location, latitude, longitude, verified, description, password_hash) VALUES
+('SpeedFleet Mumbai', 'Rajesh Sharma', 'rajesh@speedfleet.in', '9876543210', 'Mumbai, Maharashtra', 19.0760, 72.8777, 1, 'Premier fleet provider in Mumbai with a focus on high-end sedans and SUVs.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Delhi Metro Fleets', 'Anita Gupta', 'anita@delhifleets.in', '9876543211', 'Delhi, NCR', 28.7041, 77.1025, 1, 'Largest network of corporate vehicles in the capital region. 24/7 support.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Silicon Valley Rentals', 'Karthik Rao', 'karthik@svrentals.in', '9876543212', 'Bangalore, Karnataka', 12.9716, 77.5946, 1, 'Specializing in tech-enabled fleet management for Bangalore startups and giants.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Charminar Chauffeurs', 'Mohammed Ali', 'ali@charminar.in', '9876543213', 'Hyderabad, Telangana', 17.3850, 78.4867, 0, 'Reliable bulk rentals for events and corporate travel across Hyderabad.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Pune Prestige Wheels', 'Vikram Deshmukh', 'vikram@punewheels.in', '9876543214', 'Pune, Maharashtra', 18.5204, 73.8567, 1, 'Luxury and executive fleet specialists based in the heart of Pune.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Marina Motors Chennai', 'Suresh Kumar', 'suresh@marinamotors.in', '9876543215', 'Chennai, Tamil Nadu', 13.0827, 80.2707, 1, 'Leading supplier for automotive and logistics sectors in Southern India.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Victoria Fleet Kolkata', 'Joydeep Ghosh', 'joydeep@victoriafleet.in', '9876543216', 'Kolkata, West Bengal', 22.5726, 88.3639, 0, 'Traditional excellence in fleet rentals for the cultural capital.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Sabarmati Services', 'Mehul Shah', 'mehul@sabarmati.in', '9876543217', 'Ahmedabad, Gujarat', 23.0225, 72.5714, 1, 'Efficient and cost-effective bulk vehicle solutions for Gujarat businesses.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Pink City Rentals', 'Padma Singh', 'padma@pinkcity.in', '9876543218', 'Jaipur, Rajasthan', 26.9124, 75.7873, 0, 'Bespoke fleet rentals for the tourism and hospitality hub of Jaipur.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS'),
+('Diamond City Fleets', 'Rohan Mehta', 'rohan@diamondcity.in', '9876543219', 'Surat, Gujarat', 21.1702, 72.8311, 1, 'Robust fleet inventory supporting the diamond and textile industries of Surat.', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS');
 
 -- --------------------------------------------
 -- 40 Vehicles with variable prices for search variety
@@ -116,14 +116,7 @@ INSERT INTO Fleet (supplier_id, vehicle_id, available_count) VALUES
 -- Customers
 -- --------------------------------------------
 INSERT INTO Customer (name, contact, email, license_no, company_name, password_hash, role) VALUES
-('Arjun Mehta', '9988776655', 'arjun@techcorp.in', 'MH01-2020-1234567', 'TechCorp Solutions', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu', 'renter'),
-('Kavita Nair', '9988776656', 'kavita@eventpro.in', 'KA03-2019-7654321', 'EventPro India', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu', 'renter'),
-('Admin User', '9988776600', 'admin@drivera.in', NULL, 'Drivera', '$2b$12$LJ3m5ZQnJdGp1S5x5r5cTuO8X8Pk5JZ8YV7gN5wE2rA4bH6cK9dWu', 'admin');
+('Arjun Mehta', '9988776655', 'arjun@techcorp.in', 'MH01-2020-1234567', 'TechCorp Solutions', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS', 'renter'),
+('Kavita Nair', '9988776656', 'kavita@eventpro.in', 'KA03-2019-7654321', 'EventPro India', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS', 'renter'),
+('Admin User', '9988776600', 'admin@drivera.in', NULL, 'Drivera', '$2b$12$seqWi5GfK5yaXWmSnBXaTOM45ioecySOnCUbOYw0Zu1Ny3JVh.wqS', 'admin');
 
--- --------------------------------------------
--- Sample Bookings
--- --------------------------------------------
-INSERT INTO Booking (customer_id, supplier_id, vehicle_id, fleet_size, start_date, end_date, total_cost, status) VALUES
-(1, 1, 1, 5, '2026-05-01', '2026-05-07', 52500.00, 'confirmed'),
-(1, 2, 3, 2, '2026-05-10', '2026-05-15', 22000.00, 'pending'),
-(2, 3, 35, 10, '2026-06-01', '2026-06-03', 60000.00, 'confirmed');

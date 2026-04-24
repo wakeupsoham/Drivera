@@ -36,12 +36,27 @@ class User(UserMixin):
 def load_user(user_id):
     db = get_db()
     cur = db.cursor(dictionary=True)
+    
+    # First check Customer table
     cur.execute("SELECT customer_id, name, email, role FROM Customer WHERE customer_id = %s", (user_id,))
     row = cur.fetchone()
+    if row:
+        cur.close()
+        db.close()
+        return User(id=row['customer_id'], name=row['name'], email=row['email'], role=row['role'])
+    
+    # Then check Supplier table (we'll prefix supplier IDs with 's_' to avoid collisions in session)
+    if str(user_id).startswith('s_'):
+        s_id = str(user_id)[2:]
+        cur.execute("SELECT supplier_id, company_name, email FROM Supplier WHERE supplier_id = %s", (s_id,))
+        row = cur.fetchone()
+        cur.close()
+        db.close()
+        if row:
+            return User(id=f"s_{row['supplier_id']}", name=row['company_name'], email=row['email'], role='supplier')
+            
     cur.close()
     db.close()
-    if row:
-        return User(id=row['customer_id'], name=row['name'], email=row['email'], role=row['role'])
     return None
 
 
@@ -96,19 +111,35 @@ def login():
 
         db = get_db()
         cur = db.cursor(dictionary=True)
+        
+        # Check Customer table
         cur.execute("SELECT customer_id, name, email, password_hash, role FROM Customer WHERE email = %s", (email,))
         row = cur.fetchone()
-        cur.close()
-        db.close()
-
+        
         if row and bcrypt.checkpw(password.encode('utf-8'), row['password_hash'].encode('utf-8')):
             user = User(id=row['customer_id'], name=row['name'], email=row['email'], role=row['role'])
             login_user(user)
+            cur.close()
+            db.close()
             flash(f'Welcome back, {user.name}!', 'success')
+            return redirect(url_for('admin' if user.role == 'admin' else 'dashboard'))
+        
+        # Check Supplier table
+        cur.execute("SELECT supplier_id, company_name, email, password_hash FROM Supplier WHERE email = %s", (email,))
+        row = cur.fetchone()
+        
+        if row and bcrypt.checkpw(password.encode('utf-8'), row['password_hash'].encode('utf-8')):
+            user = User(id=f"s_{row['supplier_id']}", name=row['company_name'], email=row['email'], role='supplier')
+            login_user(user)
+            cur.close()
+            db.close()
+            flash(f'Supplier Login Successful: {user.name}', 'success')
             return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid email or password.', 'danger')
-            return render_template('login.html'), 401
+
+        cur.close()
+        db.close()
+        flash('Invalid email or password.', 'danger')
+        return render_template('login.html'), 401
     return render_template('login.html')
 
 
@@ -128,7 +159,7 @@ def booking():
     cur = db.cursor(dictionary=True)
     cur.execute("""
         SELECT s.supplier_id, s.company_name, s.location, s.latitude, s.longitude,
-               s.verified, s.rating, s.description,
+               s.verified, s.description,
                COUNT(f.fleet_id) AS fleet_types,
                SUM(f.available_count) AS total_vehicles,
                MIN(v.price_per_day) AS min_price,
@@ -160,7 +191,7 @@ def suppliers():
         FROM Supplier s
         LEFT JOIN Fleet f ON s.supplier_id = f.supplier_id
         GROUP BY s.supplier_id
-        ORDER BY s.verified DESC, s.rating DESC
+        ORDER BY s.verified DESC
     """)
     suppliers = cur.fetchall()
     cur.close()
@@ -214,7 +245,7 @@ def register_supplier():
     cur = db.cursor(dictionary=True)
     try:
         cur.execute(
-            "INSERT INTO Supplier (company_name, location, email, rating, verified) VALUES (%s, %s, %s, 4.0, 0)",
+            "INSERT INTO Supplier (company_name, location, email, verified) VALUES (%s, %s, %s, 0)",
             (company_name, location, email)
         )
         db.commit()
@@ -298,21 +329,103 @@ def book():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    if current_user.role == 'admin':
+        flash('Admins should use the Admin Panel.', 'info')
+        return redirect(url_for('admin'))
+        
     db = get_db()
     cur = db.cursor(dictionary=True)
+    
+    if current_user.role == 'supplier':
+        # Supplier view: see bookings received
+        supplier_id = current_user.id.split('_')[1]
+        cur.execute("""
+            SELECT b.booking_id, c.name as customer_name, c.company_name as customer_company,
+                   v.brand, v.model, v.type, b.fleet_size, b.start_date, b.end_date,
+                   b.total_cost, b.status, b.created_at
+            FROM Booking b
+            JOIN Customer c ON b.customer_id = c.customer_id
+            JOIN Vehicle v ON b.vehicle_id = v.vehicle_id
+            WHERE b.supplier_id = %s
+            ORDER BY b.created_at DESC
+        """, (supplier_id,))
+        bookings = cur.fetchall()
+        cur.close()
+        db.close()
+        return render_template('dashboard.html', bookings=bookings, is_supplier=True)
+    else:
+        # Renter view: see bookings made
+        cur.execute("""
+            SELECT b.booking_id, s.company_name, v.brand, v.model, v.type,
+                   b.fleet_size, b.start_date, b.end_date, b.total_cost, b.status
+            FROM Booking b
+            JOIN Supplier s ON b.supplier_id = s.supplier_id
+            JOIN Vehicle v ON b.vehicle_id = v.vehicle_id
+            WHERE b.customer_id = %s
+            ORDER BY b.created_at DESC
+        """, (current_user.id,))
+        bookings = cur.fetchall()
+        cur.close()
+        db.close()
+        return render_template('dashboard.html', bookings=bookings, is_supplier=False)
+
+
+# ── Booking Status Actions (For Suppliers) ───────────────────────
+@app.route('/booking/action/<int:booking_id>/<action>')
+@login_required
+def booking_action(booking_id, action):
+    if current_user.role != 'supplier':
+        flash('Unauthorized action.', 'danger')
+        return redirect(url_for('index'))
+        
+    new_status = 'confirmed' if action == 'approve' else 'cancelled'
+    supplier_id = current_user.id.split('_')[1]
+    
+    db = get_db()
+    cur = db.cursor()
+    try:
+        # Ensure the booking belongs to this supplier
+        cur.execute("UPDATE Booking SET status = %s WHERE booking_id = %s AND supplier_id = %s", 
+                   (new_status, booking_id, supplier_id))
+        db.commit()
+        flash(f'Booking #{booking_id} has been {new_status}.', 'success')
+    except Exception as e:
+        flash(f'Action failed: {str(e)}', 'danger')
+    finally:
+        cur.close()
+        db.close()
+        
+    return redirect(url_for('dashboard'))
+
+
+# ── Supplier Detail Page ─────────────────────────────────────────
+@app.route('/supplier/<int:supplier_id>')
+def supplier_detail(supplier_id):
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    
+    # Get supplier details
+    cur.execute("SELECT * FROM Supplier WHERE supplier_id = %s", (supplier_id,))
+    supplier = cur.fetchone()
+    
+    if not supplier:
+        cur.close()
+        db.close()
+        flash('Supplier not found.', 'danger')
+        return redirect(url_for('suppliers'))
+        
+    # Get vehicles listed by this supplier
     cur.execute("""
-        SELECT b.booking_id, s.company_name, v.brand, v.model, v.type,
-               b.fleet_size, b.start_date, b.end_date, b.total_cost, b.status
-        FROM Booking b
-        JOIN Supplier s ON b.supplier_id = s.supplier_id
-        JOIN Vehicle v ON b.vehicle_id = v.vehicle_id
-        WHERE b.customer_id = %s
-        ORDER BY b.created_at DESC
-    """, (current_user.id,))
-    bookings = cur.fetchall()
+        SELECT v.*, f.available_count 
+        FROM Vehicle v
+        JOIN Fleet f ON v.vehicle_id = f.vehicle_id
+        WHERE f.supplier_id = %s
+    """, (supplier_id,))
+    vehicles = cur.fetchall()
+    
     cur.close()
     db.close()
-    return render_template('dashboard.html', bookings=bookings)
+    return render_template('supplier_detail.html', supplier=supplier, vehicles=vehicles)
 
 
 # ── Admin Panel ──────────────────────────────────────────────────
@@ -341,7 +454,7 @@ def admin():
     
     cur = db.cursor(dictionary=True) # Switch to dictionary for list data
     cur.execute("""
-        SELECT s.supplier_id, s.company_name, s.email, s.location, s.verified, s.rating
+        SELECT s.supplier_id, s.company_name, s.email, s.location, s.verified
         FROM Supplier s ORDER BY s.created_at DESC
     """)
     suppliers = cur.fetchall()

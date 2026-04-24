@@ -28,8 +28,8 @@ Secondary — Suppliers
 1.5.2 User (Renter) Module
 ▸	Register/Login with email
 ▸	Search suppliers by: location, vehicle type, fleet size, date range
-▸	Map view with supplier pins and popup cards (distance, rating, price/day, availability)
-▸	List view with supplier cards (verified badge, fleet count, rating, pricing)
+▸	Map view with supplier pins and popup cards (distance, price/day, availability)
+▸	List view with supplier cards (verified badge, fleet count, pricing)
 ▸	Bulk booking with fleet size selection and date picker
 ▸	Booking confirmation and history dashboard
 1.5.3 Supplier Module
@@ -90,7 +90,7 @@ drivera/
 The existing Vehicle Rental Service schema is reused directly. Core tables:
 ▸	Customer (customer_id, name, contact, email, license_no)
 ▸	Vehicle (vehicle_id, type, model, brand, price_per_day, status)
-▸	Supplier (supplier_id, company_name, location, verified, rating)
+▸	Supplier (supplier_id, company_name, location, verified)
 ▸	Booking (booking_id, customer_id, supplier_id, vehicle_id, start_date, end_date, total_cost, status)
 ▸	Fleet (fleet_id, supplier_id, vehicle_id, available_count)
  
@@ -119,13 +119,13 @@ Landing Page
 ▸	Footer: dark navy, logo left, nav links right
 User Booking Screen (Map View)
 ▸	Left panel: search bar, Vehicle Type dropdown, Date Range picker, Fleet Size filter
-▸	Supplier list cards: thumbnail, company name, distance badge, vehicle count, price/day, star rating
+▸	Supplier list cards: thumbnail, company name, distance badge, vehicle count, price/day
 ▸	Right panel: Google Maps embed with orange location pins
-▸	Map popup on pin click: company name, vehicle count, price/day, rating
+▸	Map popup on pin click: company name, vehicle count, price/day
 ▸	Sticky CTA: 'Book Selected Fleet' (full-width orange button)
 Supplier Listing Screen
-▸	Top filter bar: Location, Vehicle Type, Availability, Rating dropdowns
-▸	3-column card grid: supplier photo, name, city, vehicle count, description excerpt, rating
+▸	Top filter bar: Location, Vehicle Type, Availability dropdowns
+▸	3-column card grid: supplier photo, name, city, vehicle count, description excerpt
 ▸	'Verified Supplier' green badge (top-right of card) for approved suppliers
 ▸	Hover state: card lifts with box-shadow, orange border-top accent
 3.3 Component States

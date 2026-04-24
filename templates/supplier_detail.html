@@ -2,91 +2,89 @@
 {% block title %}{{ supplier.company_name }} — Drivera{% endblock %}
 
 {% block content %}
-<section class="section" style="padding-top:120px; padding-bottom: 40px; background:var(--bg-darker);">
+<section class="section" style="padding-top:120px;">
     <div class="container">
-        <!-- Supplier Hero -->
-        <div class="card" style="padding:40px; display:flex; gap:30px; align-items:center; flex-wrap:wrap;">
-            <div style="width:120px;height:120px;border-radius:16px;background:linear-gradient(135deg, var(--primary), var(--primary-dark));display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:800;color:var(--white);font-family:var(--font-display);">
-                {{ supplier.company_name[0] }}
-            </div>
+        <!-- Breadcrumbs -->
+        <nav style="margin-bottom:24px;">
+            <a href="{{ url_for('suppliers') }}" style="color:var(--primary);text-decoration:none;font-size:0.9rem;">← Back to Suppliers</a>
+        </nav>
+
+        <!-- Supplier Header Card -->
+        <div class="card" style="padding:40px;margin-bottom:40px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;right:0;width:300px;height:300px;background:radial-gradient(circle, var(--primary-light) 0%, transparent 70%);opacity:0.1;pointer-events:none;"></div>
             
-            <div style="flex:1;">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-                    <h1 style="font-size:2.5rem; margin:0;">{{ supplier.company_name }}</h1>
-                    {% if supplier.verified == 1 %}
-                        <span class="badge badge-verified" style="font-size:0.9rem; padding:4px 10px;">✓ Verified Supplier</span>
-                    {% endif %}
+            <div class="flex-between" style="flex-wrap:wrap;gap:24px;align-items:start;">
+                <div style="display:flex;gap:24px;align-items:center;">
+                    <div style="width:100px;height:100px;border-radius:var(--radius-sm);background:linear-gradient(135deg, var(--primary), var(--primary-dark));display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;color:var(--white);font-family:var(--font-display);box-shadow:0 10px 20px rgba(0,0,0,0.2);">
+                        {{ supplier.company_name[0] }}
+                    </div>
+                    <div>
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                            <h2 style="font-size:2rem;margin:0;">{{ supplier.company_name }}</h2>
+                            {% if supplier.verified == 1 %}
+                                <span class="badge badge-verified">✓ Verified Supplier</span>
+                            {% endif %}
+                        </div>
+                        <p style="color:var(--muted);font-size:1.1rem;display:flex;align-items:center;gap:8px;">
+                            📍 {{ supplier.location }}
+                        </p>
+                        <div style="margin-top:16px;display:flex;gap:20px;font-size:0.95rem;">
+                            <span>✉️ {{ supplier.email }}</span>
+                            {% if supplier.phone %}
+                                <span>📞 {{ supplier.phone }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                
-                <p style="color:var(--muted); font-size:1.1rem; margin-bottom:16px;">📍 {{ supplier.location }}</p>
-                
-                {% if supplier.description %}
-                    <p style="color:var(--light-muted); line-height:1.6; max-width:800px; margin-bottom:20px;">
-                        {{ supplier.description }}
-                    </p>
-                {% endif %}
-                
-                <div style="display:flex; gap:20px; color:var(--white); font-weight:600;">
-                    <span style="background:var(--slate); padding:6px 12px; border-radius:6px;">⭐ {{ supplier.rating }} Rating</span>
-                    <span style="background:var(--slate); padding:6px 12px; border-radius:6px;">✉️ {{ supplier.email }}</span>
-                    {% if supplier.phone %}
-                        <span style="background:var(--slate); padding:6px 12px; border-radius:6px;">📞 {{ supplier.phone }}</span>
-                    {% endif %}
+                <div style="text-align:right;">
+                    <a href="{{ url_for('booking') }}" class="btn btn-primary">Book Now</a>
                 </div>
             </div>
-            
-            <!-- Contact / Quick Action -->
-            <div style="text-align:center; min-width: 250px; background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="margin-bottom: 15px; font-size:1.2rem;">Ready to book?</h3>
-                <p style="color:var(--muted); font-size:0.9rem; margin-bottom: 20px;">Select a vehicle from the fleet below to start your booking.</p>
-                <a href="#fleet" class="btn btn-primary" style="width:100%;">View Fleet ↓</a>
+
+            <div style="margin-top:32px;padding-top:32px;border-top:1px solid var(--border-color);">
+                <h4 style="margin-bottom:12px;color:var(--primary-light);text-transform:uppercase;letter-spacing:1px;font-size:0.8rem;">About the Supplier</h4>
+                <p style="color:var(--light-muted);line-height:1.7;max-width:800px;font-size:1.05rem;">
+                    {{ supplier.description or 'No description available for this supplier.' }}
+                </p>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Fleet Grid Section -->
-<section id="fleet" class="section">
-    <div class="container">
-        <h2 style="margin-bottom:30px; font-family:var(--font-display); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Available Vehicles</h2>
+        <!-- Vehicle Listings -->
+        <h3 style="margin-bottom:24px;font-size:1.5rem;">Vehicle <span class="text-gradient">Listings</span></h3>
         
         <div class="grid grid-3">
             {% for v in vehicles %}
-            <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-                <div>
-                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:15px;">
-                        <div>
-                            <span class="badge" style="background:rgba(255,255,255,0.1); color:var(--white); margin-bottom:8px; display:inline-block;">{{ v.type }}</span>
-                            <h3 style="font-size:1.4rem;">{{ v.brand }} {{ v.model }}</h3>
-                        </div>
-                        <div style="text-align:right;">
-                            <span style="font-size:1.5rem; font-weight:bold; color:var(--primary);">₹{{ v.price_per_day }}</span>
-                            <span style="display:block; color:var(--muted); font-size:0.8rem;">per day</span>
-                        </div>
-                    </div>
-                    
-                    <ul style="list-style:none; padding:0; margin: 20px 0; color:var(--light-muted); font-size:0.95rem;">
-                        <li style="margin-bottom:8px;">✓ Well maintained & sanitized</li>
-                        <li style="margin-bottom:8px;">✓ Chauffeur included option</li>
-                        <li style="margin-bottom:8px;">✓ <b>{{ v.available_count }}</b> units currently available</li>
-                    </ul>
+            <div class="card animate-on-scroll" style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+                <div class="flex-between">
+                    <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--muted);">{{ v.type }}</span>
+                    <span style="color:var(--primary);font-weight:700;">₹{{ v.price_per_day|int }}/day</span>
                 </div>
                 
-                <form action="{{ url_for('booking') }}" method="GET" style="margin-top:auto;">
-                    <!-- Pre-fill search in booking page -->
-                    <input type="hidden" name="supplier_id" value="{{ supplier.supplier_id }}">
-                    <input type="hidden" name="vehicle_type" value="{{ v.type }}">
-                    <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Book this {{ v.type }}</button>
-                </form>
-            </div>
-            {% else %}
-            <div style="grid-column:1/-1; text-align:center; padding: 40px; background:rgba(255,255,255,0.02); border-radius:12px;">
-                <p>This supplier currently has no vehicles listed.</p>
+                <div>
+                    <h4 style="font-size:1.2rem;margin-bottom:4px;">{{ v.brand }} {{ v.model }}</h4>
+                    <p style="color:var(--light-muted);font-size:0.9rem;">Available: <span style="color:var(--white);font-weight:600;">{{ v.available_count }} units</span></p>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.02);padding:12px;border-radius:var(--radius-sm);font-size:0.85rem;color:var(--muted);display:flex;gap:12px;margin-top:auto;">
+                    <span>⚡ Features: AC, GPS, Insurance</span>
+                </div>
+
+                <a href="{{ url_for('booking') }}?supplier_id={{ supplier.supplier_id }}&vehicle_type={{ v.type }}" class="btn btn-sm btn-outline" style="width:100%;margin-top:8px;">
+                    Select This Type
+                </a>
             </div>
             {% endfor %}
+
+            {% if vehicles|length == 0 %}
+            <div style="grid-column:1/-1;text-align:center;padding:60px;">
+                <p style="font-size:2rem;">🚗</p>
+                <h3 style="margin-top:12px;">No active listings</h3>
+                <p class="text-muted">This supplier currently has no vehicles available in their fleet.</p>
+            </div>
+            {% endif %}
         </div>
-        
-        <!-- Trust Indicators / Reviews Hook (Must-have feature addition) -->
+
+        <!-- Protection Guarantee Section -->
         <div style="margin-top:60px; padding:40px; background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.2); border-radius:12px;">
             <h3 style="color:#22C55E; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
                 <span>🛡️</span> Drivera Protection Guarantee
@@ -95,7 +93,6 @@
                 When you book through Drivera, your payments are held securely until the fleet is delivered. In case of any disputes, our 24/7 support team will assist you in finding an immediate replacement. All verified suppliers undergo strict quality and background checks.
             </p>
         </div>
-        
     </div>
 </section>
 {% endblock %}

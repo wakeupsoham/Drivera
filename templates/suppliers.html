@@ -6,7 +6,7 @@
     <div class="container">
         <div class="section-header">
             <h2>Fleet <span class="text-gradient">Suppliers</span></h2>
-            <p>Browse verified fleet suppliers across India. Filter by location, vehicle type, and rating.</p>
+            <p>Browse verified fleet suppliers across India. Filter by location and vehicle type.</p>
         </div>
 
         <!-- Filter Bar -->
@@ -29,17 +29,15 @@
                 <option value="Luxury">Luxury</option>
                 <option value="Electric">Electric</option>
             </select>
-            <select class="form-control" style="max-width:200px;" id="filterRating">
-                <option value="">Any Rating</option>
-                <option value="4">4+ Stars</option>
-                <option value="3">3+ Stars</option>
-            </select>
         </div>
 
         <!-- Supplier Grid -->
         <div class="grid grid-3">
             {% for s in suppliers %}
-            <div class="card supplier-card animate-on-scroll">
+            <div class="card supplier-card animate-on-scroll" 
+                 ondblclick="window.location.href='{{ url_for('supplier_detail', supplier_id=s.supplier_id) }}'"
+                 style="cursor: pointer;"
+                 title="Double-click to view details">
                 {% if s.verified == 1 %}
                     <span class="badge badge-verified verified-badge">✓ Verified Supplier</span>
                 {% endif %}
@@ -61,13 +59,12 @@
                     <div class="supplier-meta">
                         <span>🚗 {{ s.total_vehicles or 0 }} vehicles</span>
                         <span>📦 {{ s.fleet_types or 0 }} fleet types</span>
-                        <span class="star-rating">⭐ {{ s.rating }}</span>
                     </div>
                 </div>
-
-                <a href="{{ url_for('supplier_detail', supplier_id=s.supplier_id) }}" class="btn btn-sm btn-primary" style="margin-top:20px;width:100%;" target="_blank">
-                    View Fleet & Profile →
-                </a>
+                
+                <div style="margin-top: 20px; text-align: center; font-size: 0.8rem; color: var(--muted); opacity: 0.6;">
+                    <small>Double-click to expand</small>
+                </div>
             </div>
             {% endfor %}
 

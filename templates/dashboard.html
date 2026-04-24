@@ -7,16 +7,24 @@
         <div class="flex-between" style="margin-bottom:40px;flex-wrap:wrap;gap:16px;">
             <div>
                 <h2>Welcome back, <span class="text-gradient">{{ current_user.name }}</span></h2>
-                <p class="text-muted" style="margin-top:4px;">Manage your fleet bookings and track delivery status.</p>
+                <p class="text-muted" style="margin-top:4px;">
+                    {% if is_supplier %}
+                        Manage your incoming fleet requests and confirm bookings.
+                    {% else %}
+                        Manage your fleet bookings and track delivery status.
+                    {% endif %}
+                </p>
             </div>
-            <a href="{{ url_for('booking') }}" class="btn btn-primary">+ New Booking</a>
+            {% if not is_supplier %}
+                <a href="{{ url_for('booking') }}" class="btn btn-primary">+ New Booking</a>
+            {% endif %}
         </div>
 
         <!-- Stats Row -->
         <div class="grid grid-4" style="margin-bottom:40px;">
             <div class="stat-card">
                 <div class="stat-value">{{ bookings|length }}</div>
-                <div class="stat-label">Total Bookings</div>
+                <div class="stat-label">Total {{ 'Requests' if is_supplier else 'Bookings' }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">
@@ -34,12 +42,12 @@
                 <div class="stat-value">
                     ₹{{ bookings|sum(attribute='total_cost')|int if bookings else 0 }}
                 </div>
-                <div class="stat-label">Total Spent</div>
+                <div class="stat-label">{{ 'Projected Revenue' if is_supplier else 'Total Spent' }}</div>
             </div>
         </div>
 
         <!-- Bookings Table -->
-        <h3 style="margin-bottom:20px;">Booking History</h3>
+        <h3 style="margin-bottom:20px;">{{ 'Incoming Requests' if is_supplier else 'Booking History' }}</h3>
 
         {% if bookings|length > 0 %}
         <div class="table-wrapper">
@@ -47,19 +55,29 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Supplier</th>
+                        <th>{{ 'Customer' if is_supplier else 'Supplier' }}</th>
                         <th>Vehicle</th>
                         <th>Fleet Size</th>
                         <th>Dates</th>
                         <th>Total Cost</th>
                         <th>Status</th>
+                        {% if is_supplier %}
+                            <th>Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for b in bookings %}
                     <tr>
                         <td>#{{ b.booking_id }}</td>
-                        <td>{{ b.company_name }}</td>
+                        <td>
+                            {% if is_supplier %}
+                                <div style="font-weight:600;">{{ b.customer_name }}</div>
+                                <div style="font-size:0.8rem;color:var(--muted);">{{ b.customer_company }}</div>
+                            {% else %}
+                                {{ b.company_name }}
+                            {% endif %}
+                        </td>
                         <td>{{ b.brand }} {{ b.model }} <span class="text-muted">({{ b.type }})</span></td>
                         <td>{{ b.fleet_size }} vehicles</td>
                         <td>{{ b.start_date }} → {{ b.end_date }}</td>
@@ -67,6 +85,18 @@
                         <td>
                             <span class="badge badge-{{ b.status }}">{{ b.status|capitalize }}</span>
                         </td>
+                        {% if is_supplier %}
+                            <td>
+                                {% if b.status == 'pending' %}
+                                    <div style="display:flex;gap:8px;">
+                                        <a href="{{ url_for('booking_action', booking_id=b.booking_id, action='approve') }}" class="btn btn-sm" style="background:#10b981;padding:6px 12px;font-size:0.75rem;">Approve</a>
+                                        <a href="{{ url_for('booking_action', booking_id=b.booking_id, action='reject') }}" class="btn btn-sm" style="background:#ef4444;padding:6px 12px;font-size:0.75rem;">Reject</a>
+                                    </div>
+                                {% else %}
+                                    <span style="font-size:0.8rem;color:var(--muted);">Completed</span>
+                                {% endif %}
+                            </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -75,9 +105,17 @@
         {% else %}
         <div class="card" style="text-align:center;padding:60px;">
             <p style="font-size:2rem;margin-bottom:8px;">📋</p>
-            <h3>No bookings yet</h3>
-            <p class="text-muted" style="margin-top:8px;margin-bottom:24px;">Start by searching for fleet suppliers and making your first booking.</p>
-            <a href="{{ url_for('booking') }}" class="btn btn-primary">Book a Fleet</a>
+            <h3>No {{ 'requests' if is_supplier else 'bookings' }} yet</h3>
+            <p class="text-muted" style="margin-top:8px;margin-bottom:24px;">
+                {% if is_supplier %}
+                    Wait for customers to send fleet requests to your company.
+                {% else %}
+                    Start by searching for fleet suppliers and making your first booking.
+                {% endif %}
+            </p>
+            {% if not is_supplier %}
+                <a href="{{ url_for('booking') }}" class="btn btn-primary">Book a Fleet</a>
+            {% endif %}
         </div>
         {% endif %}
     </div>

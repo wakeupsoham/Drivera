@@ -1,5 +1,7 @@
 import mysql.connector
 import os
+import sys
+sys.path.append(os.getcwd())
 from config import Config
 
 def run_sql_file(filename, connection):

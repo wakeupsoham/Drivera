@@ -32,7 +32,9 @@
                 <li><a href="{{ url_for('booking') }}" class="{{ 'active' if request.endpoint == 'booking' }}">Book a Fleet</a></li>
                 <li><a href="{{ url_for('suppliers') }}" class="{{ 'active' if request.endpoint == 'suppliers' }}">Suppliers</a></li>
                 {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Dashboard</a></li>
+                    {% if current_user.role != 'admin' %}
+                        <li><a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Dashboard</a></li>
+                    {% endif %}
                     {% if current_user.role == 'admin' %}
                         <li><a href="{{ url_for('admin') }}" class="{{ 'active' if request.endpoint == 'admin' }}">Admin</a></li>
                     {% endif %}
