@@ -83,7 +83,21 @@
                         <td>{{ b.start_date }} → {{ b.end_date }}</td>
                         <td style="font-weight:600;color:var(--primary);">₹{{ b.total_cost|int }}</td>
                         <td>
-                            <span class="badge badge-{{ b.status }}">{{ b.status|capitalize }}</span>
+                            {% if b.status == 'cancelled' or b.status == 'rejected' %}
+                                {% if not is_supplier %}
+                                    <span class="badge" style="background:#ef4444;color:white;padding:4px 8px;border-radius:4px;font-size:0.8rem;">Supplier busy in your timeslot</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Rejected</span>
+                                {% endif %}
+                            {% elif b.status == 'confirmed' %}
+                                {% if not is_supplier %}
+                                    <span class="badge" style="background:#10b981;color:white;padding:4px 8px;border-radius:4px;font-size:0.8rem;">Accepted</span>
+                                {% else %}
+                                    <span class="badge badge-success">Confirmed</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge badge-{{ b.status }}">{{ b.status|capitalize }}</span>
+                            {% endif %}
                         </td>
                         {% if is_supplier %}
                             <td>

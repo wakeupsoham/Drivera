@@ -205,26 +205,27 @@ def supplier_detail(supplier_id):
     db = get_db()
     cur = db.cursor(dictionary=True)
     
+    # Get supplier details
     cur.execute("SELECT * FROM Supplier WHERE supplier_id = %s", (supplier_id,))
     supplier = cur.fetchone()
     
     if not supplier:
         cur.close()
         db.close()
-        flash('Supplier not found.', 'warning')
+        flash('Supplier not found.', 'danger')
         return redirect(url_for('suppliers'))
-
+        
+    # Get vehicles listed by this supplier
     cur.execute("""
-        SELECT v.vehicle_id, v.type, v.model, v.brand, v.price_per_day, v.status, f.available_count
-        FROM Fleet f
-        JOIN Vehicle v ON f.vehicle_id = v.vehicle_id
+        SELECT v.*, f.available_count 
+        FROM Vehicle v
+        JOIN Fleet f ON v.vehicle_id = f.vehicle_id
         WHERE f.supplier_id = %s
     """, (supplier_id,))
     vehicles = cur.fetchall()
     
     cur.close()
     db.close()
-    
     return render_template('supplier_detail.html', supplier=supplier, vehicles=vehicles)
 
 
@@ -238,18 +239,23 @@ def register_supplier():
     company_name = request.form.get('company_name')
     location = request.form.get('location')
     email = request.form.get('email')
+    password = request.form.get('password')
     
-    # Optional: could also handle vehicle_type here to create an initial fleet/vehicle record
+    if not password:
+        flash('Password is required.', 'danger')
+        return redirect(url_for('suppliers'))
+
+    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     db = get_db()
     cur = db.cursor(dictionary=True)
     try:
         cur.execute(
-            "INSERT INTO Supplier (company_name, location, email, verified) VALUES (%s, %s, %s, 0)",
-            (company_name, location, email)
+            "INSERT INTO Supplier (company_name, location, email, password_hash, verified) VALUES (%s, %s, %s, %s, 0)",
+            (company_name, location, email, password_hash)
         )
         db.commit()
-        flash('Application sent and will be processed in 3 business days.', 'success')
+        flash('Application submitted! You can now log in to your dashboard.', 'success')
     except Exception as e:
         flash(f'Registration failed: {str(e)}', 'danger')
     finally:
@@ -278,9 +284,9 @@ def book():
         db = get_db()
         cur = db.cursor() # Keep as tuple here since access is vehicle[0]
         
-        # Find a vehicle of that type belonging to the supplier
+        # Find a vehicle of that type belonging to the supplier and check inventory
         cur.execute("""
-            SELECT v.vehicle_id, v.price_per_day 
+            SELECT v.vehicle_id, v.price_per_day, f.available_count
             FROM Vehicle v
             JOIN Fleet f ON v.vehicle_id = f.vehicle_id
             WHERE f.supplier_id = %s AND v.type = %s
@@ -296,6 +302,13 @@ def book():
             
         vehicle_id = vehicle[0]
         price_per_day = float(vehicle[1])
+        available_count = int(vehicle[2])
+
+        if fleet_size > available_count:
+            cur.close()
+            db.close()
+            flash(f'Insufficient inventory. Only {available_count} vehicles available for this type.', 'warning')
+            return redirect(url_for('booking'))
         
         # Calculate days 
         from datetime import datetime
@@ -317,7 +330,7 @@ def book():
         cur.close()
         db.close()
         
-        flash('Booking submitted successfully!', 'success')
+        flash('The request is pending for confirmation by the fleet supplier.', 'success')
         return redirect(url_for('dashboard'))
         
     except Exception as e:
@@ -325,7 +338,7 @@ def book():
         return redirect(url_for('booking'))
 
 
-# ── Dashboard (Renter Booking History) ───────────────────────────
+# ── Dashboard (Supplier/Renter History) ─────────────────────────
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -378,17 +391,37 @@ def booking_action(booking_id, action):
         flash('Unauthorized action.', 'danger')
         return redirect(url_for('index'))
         
-    new_status = 'confirmed' if action == 'approve' else 'cancelled'
     supplier_id = current_user.id.split('_')[1]
     
     db = get_db()
     cur = db.cursor()
     try:
-        # Ensure the booking belongs to this supplier
-        cur.execute("UPDATE Booking SET status = %s WHERE booking_id = %s AND supplier_id = %s", 
-                   (new_status, booking_id, supplier_id))
-        db.commit()
-        flash(f'Booking #{booking_id} has been {new_status}.', 'success')
+        if action == 'approve':
+            # Get booking details to decrement fleet count
+            cur.execute("SELECT vehicle_id, fleet_size, status FROM Booking WHERE booking_id = %s", (booking_id,))
+            booking = cur.fetchone()
+            
+            if booking and booking[2] == 'pending':
+                v_id = booking[0]
+                f_size = booking[1]
+                
+                # Update status
+                cur.execute("UPDATE Booking SET status = 'confirmed' WHERE booking_id = %s AND supplier_id = %s", 
+                           (booking_id, supplier_id))
+                
+                # Decrement Fleet count
+                cur.execute("UPDATE Fleet SET available_count = available_count - %s WHERE supplier_id = %s AND vehicle_id = %s",
+                           (f_size, supplier_id, v_id))
+                
+                db.commit()
+                flash(f'Booking #{booking_id} approved. Inventory updated.', 'success')
+            else:
+                flash('Booking already processed or not found.', 'warning')
+        else:
+            cur.execute("UPDATE Booking SET status = 'cancelled' WHERE booking_id = %s AND supplier_id = %s", 
+                       (booking_id, supplier_id))
+            db.commit()
+            flash(f'Booking #{booking_id} has been cancelled.', 'success')
     except Exception as e:
         flash(f'Action failed: {str(e)}', 'danger')
     finally:
@@ -398,41 +431,11 @@ def booking_action(booking_id, action):
     return redirect(url_for('dashboard'))
 
 
-# ── Supplier Detail Page ─────────────────────────────────────────
-@app.route('/supplier/<int:supplier_id>')
-def supplier_detail(supplier_id):
-    db = get_db()
-    cur = db.cursor(dictionary=True)
-    
-    # Get supplier details
-    cur.execute("SELECT * FROM Supplier WHERE supplier_id = %s", (supplier_id,))
-    supplier = cur.fetchone()
-    
-    if not supplier:
-        cur.close()
-        db.close()
-        flash('Supplier not found.', 'danger')
-        return redirect(url_for('suppliers'))
-        
-    # Get vehicles listed by this supplier
-    cur.execute("""
-        SELECT v.*, f.available_count 
-        FROM Vehicle v
-        JOIN Fleet f ON v.vehicle_id = f.vehicle_id
-        WHERE f.supplier_id = %s
-    """, (supplier_id,))
-    vehicles = cur.fetchall()
-    
-    cur.close()
-    db.close()
-    return render_template('supplier_detail.html', supplier=supplier, vehicles=vehicles)
-
-
 # ── Admin Panel ──────────────────────────────────────────────────
 @app.route('/admin')
 @login_required
 def admin():
-    if current_user.email != 'admin@drivera.in':
+    if current_user.role != 'admin':
         flash('Access denied. Admin only.', 'danger')
         return redirect(url_for('index'))
 
@@ -481,55 +484,68 @@ def admin():
                            bookings=bookings)
 
 
-# ── Admin Actions (Interactive Controls) ─────────────────────────
-@app.route('/admin/supplier/<int:supplier_id>/<action>', methods=['POST'])
+# ── Admin Panel Actions ──────────────────────────────────────────
+@app.route('/admin/supplier/verify/<int:supplier_id>/<int:status>')
 @login_required
-def admin_manage_supplier(supplier_id, action):
-    if current_user.email != 'admin@drivera.in':
-        flash('Access denied.', 'danger')
+def admin_verify_supplier(supplier_id, status):
+    if current_user.role != 'admin':
+        flash('Unauthorized.', 'danger')
         return redirect(url_for('index'))
         
     db = get_db()
     cur = db.cursor()
-    
-    if action == 'verify':
-        cur.execute("UPDATE Supplier SET verified = 1 WHERE supplier_id = %s", (supplier_id,))
-        flash(f'Supplier #{supplier_id} has been verified.', 'success')
-    elif action == 'reject':
+    try:
+        cur.execute("UPDATE Supplier SET verified = %s WHERE supplier_id = %s", (status, supplier_id))
+        db.commit()
+        msg = "Supplier verified!" if status == 1 else "Supplier verification removed."
+        flash(msg, 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+    finally:
+        cur.close()
+        db.close()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/booking/delete/<int:booking_id>')
+@login_required
+def admin_delete_booking(booking_id):
+    if current_user.role != 'admin':
+        flash('Unauthorized.', 'danger')
+        return redirect(url_for('index'))
+        
+    db = get_db()
+    cur = db.cursor()
+    try:
+        cur.execute("DELETE FROM Booking WHERE booking_id = %s", (booking_id,))
+        db.commit()
+        flash(f'Booking #{booking_id} deleted.', 'info')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+    finally:
+        cur.close()
+        db.close()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/supplier/delete/<int:supplier_id>')
+@login_required
+def admin_delete_supplier(supplier_id):
+    if current_user.role != 'admin':
+        flash('Unauthorized.', 'danger')
+        return redirect(url_for('index'))
+        
+    db = get_db()
+    cur = db.cursor()
+    try:
         cur.execute("DELETE FROM Supplier WHERE supplier_id = %s", (supplier_id,))
-        flash(f'Supplier #{supplier_id} application rejected.', 'info')
-        
-    db.commit()
-    cur.close()
-    db.close()
+        db.commit()
+        flash(f'Supplier #{supplier_id} and their fleet records deleted.', 'info')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+    finally:
+        cur.close()
+        db.close()
     return redirect(url_for('admin'))
 
 
-@app.route('/admin/booking/<int:booking_id>/<action>', methods=['POST'])
-@login_required
-def admin_manage_booking(booking_id, action):
-    if current_user.email != 'admin@drivera.in':
-        flash('Access denied.', 'danger')
-        return redirect(url_for('index'))
-        
-    db = get_db()
-    cur = db.cursor()
-    
-    valid_statuses = {'confirm': 'confirmed', 'cancel': 'cancelled', 'complete': 'completed'}
-    
-    if action in valid_statuses:
-        new_status = valid_statuses[action]
-        cur.execute("UPDATE Booking SET status = %s WHERE booking_id = %s", (new_status, booking_id))
-        flash(f'Booking #{booking_id} status updated to {new_status}.', 'success')
-    else:
-        flash('Invalid action.', 'danger')
-        
-    db.commit()
-    cur.close()
-    db.close()
-    return redirect(url_for('admin'))
-
-
-# ── Run ──────────────────────────────────────────────────────────
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
